@@ -5,9 +5,7 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import org.junit.jupiter.api.Test;
 
-import javax.net.ssl.SSLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 class NettyClientEngineTest {
 
@@ -15,9 +13,11 @@ class NettyClientEngineTest {
     public void testOnDefaultNettyClientEngine(){
         try {
             NettyClientEngine nettyClientEngine = new NettyClientEngine.NettyEngineBuilder().buildDefaultTestEngine();
-            nettyClientEngine.execute(new CrawlTask("www.baidu.com", 80, new URI("http://www.baidu.com"),
-                    HttpVersion.HTTP_1_1, HttpMethod.GET, null));
-            Thread.sleep(1000);
+            for (int i = 0; i < 10; i++) {
+                nettyClientEngine.execute(new CrawlTask("www.baidu.com", 80, new URI("http://www.baidu.com"),
+                        HttpVersion.HTTP_1_1, HttpMethod.GET, null));
+                Thread.sleep(1000);
+            }
         }catch (Exception ignored){}
     }
 }

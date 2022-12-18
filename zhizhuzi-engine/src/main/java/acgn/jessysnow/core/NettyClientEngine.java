@@ -9,6 +9,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLException;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.function.Consumer;
 /**
  * Netty implement of Http client engine
  */
+@Slf4j
 public class NettyClientEngine implements ClientEngine{
     // Cached bootstrap
     private final Bootstrap bootstrap;
@@ -40,6 +42,10 @@ public class NettyClientEngine implements ClientEngine{
         this.compress = compress;
     }
 
+    /**
+     * In this boot implement, simply close a channel and log the remote address of it
+     * while an exception happens in the handler chains
+     */
     @Override
     public void boot() {
         try {
@@ -48,6 +54,8 @@ public class NettyClientEngine implements ClientEngine{
                     .handler(new HttpChannelInitializer(ssl, compress, new Consumer<ChannelHandlerContext>() {
                         @Override
                         public void accept(ChannelHandlerContext channelHandlerContext) {
+                            log.info("Exception in channel, which remote address is: {}, this channel will be closed later",
+                                    channelHandlerContext.channel().remoteAddress());
                             channelHandlerContext.close();
                         }
                     }));
@@ -113,6 +121,7 @@ public class NettyClientEngine implements ClientEngine{
      * Engine builder
      */
     public static class NettyEngineBuilder{
+
         private static final HashMap<ChannelOption<Boolean>, Boolean> SO_OP_MAP;
         static {
             SO_OP_MAP = new HashMap<>();
@@ -120,6 +129,15 @@ public class NettyClientEngine implements ClientEngine{
             SO_OP_MAP.put(ChannelOption.TCP_NODELAY, true);
         }
 
+        /**
+         * Default engine
+         *  - Reactor pool size : 2 * processor's number
+         *  - ssl : false, no ssl handler in pipeline
+         *  - compress : true
+         *  - Socket-KeepAlive : false
+         *  - TCP-NoDelay : true
+         * @return client engine have not booted
+         */
         public NettyClientEngine buildDefaultEngine(){
             return new NettyClientEngine(Runtime.getRuntime().availableProcessors() * 2
                     , false
@@ -127,6 +145,15 @@ public class NettyClientEngine implements ClientEngine{
                     , SO_OP_MAP);
         }
 
+        /**
+         * SSL engine
+         *  - Reactor pool size : 2 * processor's number
+         *  - ssl : true, ssl handler in the head of pipeline
+         *  - compress : true
+         *  - Socket-KeepAlive : false
+         *  - TCP-NoDelay : true
+         * @return client engine have not booted
+         */
         public NettyClientEngine buildSSLEngine(){
             return new NettyClientEngine(Runtime.getRuntime().availableProcessors()  * 2
                     , true
@@ -136,6 +163,7 @@ public class NettyClientEngine implements ClientEngine{
 
         /**
          * only for unit test, pre-boot
+         *      print http-response's content to console
          * @return a ClientEngine for junit test
          */
         public NettyClientEngine buildDefaultTestEngine() throws SSLException {
