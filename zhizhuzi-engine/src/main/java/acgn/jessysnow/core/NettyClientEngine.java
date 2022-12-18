@@ -1,6 +1,6 @@
 package acgn.jessysnow.core;
 
-import acgn.jessysnow.functions.PrintContentHandler;
+import acgn.jessysnow.helper.PrintContentHandler;
 import acgn.jessysnow.http.HttpChannelInitializer;
 import acgn.jessysnow.pojo.CrawlTask;
 import io.netty.bootstrap.Bootstrap;
@@ -9,7 +9,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
-import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLException;
 import java.util.HashMap;
@@ -136,7 +135,7 @@ public class NettyClientEngine implements ClientEngine{
         }
 
         /**
-         * only for unit test
+         * only for unit test, pre-boot
          * @return a ClientEngine for junit test
          */
         public NettyClientEngine buildDefaultTestEngine() throws SSLException {

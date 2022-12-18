@@ -18,10 +18,6 @@ class NettyClientEngineTest {
             nettyClientEngine.execute(new CrawlTask("www.baidu.com", 80, new URI("http://www.baidu.com"),
                     HttpVersion.HTTP_1_1, HttpMethod.GET, null));
             Thread.sleep(1000);
-        } catch (URISyntaxException e) {
-            System.out.println("Error in creating uri");
-        } catch (InterruptedException | SSLException e) {
-            throw new RuntimeException(e);
-        }
+        }catch (Exception ignored){}
     }
 }
