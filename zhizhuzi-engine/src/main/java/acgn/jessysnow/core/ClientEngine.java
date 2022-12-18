@@ -11,15 +11,16 @@ public interface ClientEngine {
     // boot the http client
     void boot();
 
-    // boot the http client, with a customize error handling strategy
+    // boot the http client, with a customized exception handling strategy
     default void boot(Consumer<ChannelHandlerContext> strategy){
         throw new UnsupportedOperationException();
     }
 
+    // boot the http client, with a customized pipeline handler
     default void boot(ChannelInitializer<SocketChannel> initializer){
         throw new UnsupportedOperationException();
     }
 
-    // execute a specific crawl task
+    // execute a crawl task
     void execute(CrawlTask task);
 }

@@ -9,6 +9,10 @@ import java.net.URI;
 
 class NettyClientEngineTest {
 
+    /**
+     * Download test, target : www.baidu.com
+     *                repeat : 10 times
+     */
     @Test
     public void testOnDefaultNettyClientEngine(){
         try {
