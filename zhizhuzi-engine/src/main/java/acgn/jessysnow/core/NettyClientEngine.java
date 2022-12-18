@@ -9,16 +9,20 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpVersion;
+import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
 /**
  * Netty implement of Http client engine
  */
-@Slf4j
+@Log4j2
 public class NettyClientEngine implements ClientEngine{
     // Cached bootstrap
     private final Bootstrap bootstrap;
