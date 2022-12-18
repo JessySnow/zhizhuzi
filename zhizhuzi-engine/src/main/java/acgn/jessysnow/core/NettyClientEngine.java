@@ -1,16 +1,18 @@
 package acgn.jessysnow.core;
 
+import acgn.jessysnow.functions.PrintContentHandler;
 import acgn.jessysnow.http.HttpChannelInitializer;
+import acgn.jessysnow.pojo.CrawlTask;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelOption;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioChannelOption;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLException;
-import java.util.*;
+import java.util.HashMap;
 import java.util.function.Consumer;
 
 /**
@@ -19,32 +21,40 @@ import java.util.function.Consumer;
 public class NettyClientEngine implements ClientEngine{
     // Cached bootstrap
     private final Bootstrap bootstrap;
+    private final NioEventLoopGroup workGroup;
     // Reactor thread pool size
     private final int poolSize;
     // Global Socket Option
     private final HashMap<ChannelOption<Boolean>, Boolean> optionSwitch;
     // HTTP options
-    private boolean ssl;
-    private boolean compress;
+    private final boolean ssl;
+    private final boolean compress;
 
 
     private NettyClientEngine(int poolSize, boolean ssl, boolean compress,
                               HashMap<ChannelOption<Boolean>, Boolean> optionSwitch){
+        this.workGroup = new NioEventLoopGroup(poolSize);
         this.bootstrap = new Bootstrap();
         this.optionSwitch = optionSwitch;
         this.poolSize = poolSize;
         this.ssl = ssl;
         this.compress = compress;
-
     }
 
     @Override
     public void boot() {
         try {
-            this.bootstrap.group(new NioEventLoopGroup(poolSize))
+            this.bootstrap.group(workGroup)
                     .channel(NioSocketChannel.class)
-                    .handler(new HttpChannelInitializer(ssl, compress, null));
-            this.optionSwitch.entrySet().forEach(entry -> bootstrap.option(entry.getKey(), entry.getValue()));
+                    .handler(new HttpChannelInitializer(ssl, compress, new Consumer<ChannelHandlerContext>() {
+                        @Override
+                        public void accept(ChannelHandlerContext channelHandlerContext) {
+                            channelHandlerContext.close();
+                        }
+                    }));
+            if(this.optionSwitch != null) {
+                this.optionSwitch.forEach(bootstrap::option);
+            }
         } catch (SSLException e) {
             e.printStackTrace();
         }
@@ -57,13 +67,47 @@ public class NettyClientEngine implements ClientEngine{
     @Override
     public void boot(Consumer<ChannelHandlerContext> strategy) {
         try {
-            this.bootstrap.group(new NioEventLoopGroup(poolSize))
+            this.bootstrap.group(workGroup)
                     .channel(NioSocketChannel.class)
                     .handler(new HttpChannelInitializer(ssl, compress, strategy));
-            this.optionSwitch.entrySet().forEach(entry -> bootstrap.option(entry.getKey(), entry.getValue()));
+            if(this.optionSwitch != null) {
+                this.optionSwitch.forEach(bootstrap::option);
+            }
         } catch (SSLException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Customize channel initializer
+     * @param initializer channel initializer
+     */
+    @Override
+    public void boot(ChannelInitializer<SocketChannel> initializer) {
+        this.bootstrap.group(workGroup)
+                .channel(NioSocketChannel.class)
+                .handler(initializer);
+        if(this.optionSwitch != null) {
+            this.optionSwitch.forEach(bootstrap::option);
+        }
+    }
+
+    @Override
+    public void execute(CrawlTask task) {
+        if(this.bootstrap.config().group().isShutdown()){
+            throw new RuntimeException("ClientEngine already closed");
+        }
+
+        // Flush back the request while tcp-connection is build
+        bootstrap.connect(task.getHost(), task.getPort())
+                .addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                DefaultFullHttpRequest request = new DefaultFullHttpRequest(task.getHttpVersion(), task.getMethod(),
+                        task.getUri().toASCIIString());
+                channelFuture.channel().writeAndFlush(request);
+            }
+        });
     }
 
     /**
@@ -78,7 +122,7 @@ public class NettyClientEngine implements ClientEngine{
         }
 
         public NettyClientEngine buildDefaultEngine(){
-            return new NettyClientEngine(Runtime.getRuntime().availableProcessors()
+            return new NettyClientEngine(Runtime.getRuntime().availableProcessors() * 2
                     , false
                     , true
                     , SO_OP_MAP);
@@ -89,6 +133,16 @@ public class NettyClientEngine implements ClientEngine{
                     , true
                     , true
                     , SO_OP_MAP);
+        }
+
+        /**
+         * only for unit test
+         * @return a ClientEngine for junit test
+         */
+        public NettyClientEngine buildDefaultTestEngine() throws SSLException {
+            NettyClientEngine engine = this.buildDefaultEngine();
+            engine.boot(new HttpChannelInitializer(engine.ssl, engine.compress, new PrintContentHandler()));
+            return engine;
         }
     }
 }
