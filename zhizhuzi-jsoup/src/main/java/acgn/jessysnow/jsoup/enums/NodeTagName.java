@@ -5,6 +5,7 @@ package acgn.jessysnow.jsoup.enums;
  *  JS style
  */
 public enum NodeTagName {
+    NULL,
     a,
     abbr,
     acronym,

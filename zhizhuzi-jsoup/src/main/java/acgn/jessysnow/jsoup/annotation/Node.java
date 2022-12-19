@@ -7,6 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static acgn.jessysnow.jsoup.enums.NodeTagName.*;
 /**
  * Dom Node def
  *     Supported approach to traverse html document
@@ -14,8 +15,12 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Node {
-    String nodeName();
-    String nodeId();
-    NodeTagName nodeTagName();
-    String nodeClassName();
+    // Priority order
+    String nodeId() default "";
+    String nodeClassName() default "";
+    NodeTagName nodeTagName() default NULL;
+
+    // Priority order
+    int order() default -1;
+    int bias() default 0; // bias from top
 }
