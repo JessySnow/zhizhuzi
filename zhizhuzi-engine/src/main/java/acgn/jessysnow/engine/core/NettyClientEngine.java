@@ -1,9 +1,9 @@
-package acgn.jessysnow.core;
+package acgn.jessysnow.engine.core;
 
-import acgn.jessysnow.helper.PrintContentHandler;
-import acgn.jessysnow.helper.UAHelper;
-import acgn.jessysnow.http.HttpChannelInitializer;
-import acgn.jessysnow.pojo.CrawlTask;
+import acgn.jessysnow.engine.helper.PrintContentHandler;
+import acgn.jessysnow.engine.helper.UAHelper;
+import acgn.jessysnow.engine.http.HttpChannelInitializer;
+import acgn.jessysnow.engine.pojo.CrawlTask;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;

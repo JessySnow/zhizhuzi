@@ -1,6 +1,7 @@
 package acgn.jessysnow.core;
 
-import acgn.jessysnow.pojo.CrawlTask;
+import acgn.jessysnow.engine.core.NettyClientEngine;
+import acgn.jessysnow.engine.pojo.CrawlTask;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import lombok.extern.log4j.Log4j2;

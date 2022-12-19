@@ -1,4 +1,4 @@
-package acgn.jessysnow.pojo;
+package acgn.jessysnow.engine.pojo;
 
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.HttpMethod;
