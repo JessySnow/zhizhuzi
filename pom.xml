@@ -12,6 +12,7 @@
     <modules>
         <module>zhizhuzi-engine</module>
         <module>zhizhuzi-jsoup</module>
+        <module>zhizhuzi-common</module>
     </modules>
 
     <properties>

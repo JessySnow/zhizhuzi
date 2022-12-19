@@ -1,5 +1,6 @@
 package acgn.jessysnow.jsoup.parser;
 
+import acgn.jessysnow.common.exception.UnsupportedTypeException;
 import acgn.jessysnow.jsoup.annotation.Node;
 import acgn.jessysnow.jsoup.annotation.Nodes;
 import acgn.jessysnow.jsoup.pojo.WebSite;
@@ -11,9 +12,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
 
+
+// FIXME printstacktrace 的效率问题
 /**
  * Parser a Html document by HTML DOM-Tree
- *
  * Thread safe util class
  */
 @Log4j2
@@ -44,13 +46,28 @@ public class DomParser implements Parser{
                 continue;
             }
 
+            f.setAccessible(true);
+            Object res = null;
             // TODO SET FIELD
             if(type.equals(String.class)){
                 // Single values
-                String res = this.parseSingle(html, nodes);
+                res = (Object) this.parseSingle(html, nodes);
             }else if(type.equals(List.class)){
                 // Multi values
-                List<String> res = this.parseMulti(html, nodes);
+                res = (Object) this.parseMulti(html, nodes);
+            }else {
+                try {
+                    throw new UnsupportedTypeException("Un");
+                } catch (UnsupportedTypeException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // Set field
+            try {
+                f.set(site, res);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
             }
         }
 
