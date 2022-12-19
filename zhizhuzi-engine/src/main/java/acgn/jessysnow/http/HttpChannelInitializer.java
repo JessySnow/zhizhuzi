@@ -1,23 +1,30 @@
 package acgn.jessysnow.http;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
-import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.util.CharsetUtil;
+import io.netty.handler.ssl.SslHandler;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
 import javax.net.ssl.SSLException;
 import java.util.function.Consumer;
 
 /**
  * Initialize channel-pipeline, codec http protocol
+ *      - ssl : Add a SSLHandler to pipeline or not
+ *      - compress : Add a HttpDecompress to pipeline or not
+ *      - strategy : Logic to deal with exception thrown in channel pipeline, will be added at the tail of pipeline
+ *      - sslContext : Ssl context to build ssl
+ *      - bizHandler : Logic to consume the response of http request, will be added before pipeline's exception handler
+ *
+ *
+ * SSLHandler(Optional) --> HttpCodec --> HttpAggregator --> HttpDecompress --> BizHandler(Optional) --> ExceptionHandler
  */
 public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
     private final boolean ssl;
@@ -30,7 +37,7 @@ public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
         this.ssl = ssl;
         this.compress = compress;
         if(ssl){
-            this.sslContext = SslContextBuilder.forClient().build();
+            this.sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
         }
     }
 
@@ -47,7 +54,7 @@ public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         if(ssl) {
-            ch.pipeline().addLast("http-ssl", sslContext.newHandler(ch.alloc()));
+            ch.pipeline().addLast("http-ssl", new SslHandler(sslContext.newEngine(ch.alloc()), true));
         }
         ch.pipeline().addLast("http-codec", new HttpClientCodec()).
                 addLast("http-aggregator", new HttpObjectAggregator(65536));

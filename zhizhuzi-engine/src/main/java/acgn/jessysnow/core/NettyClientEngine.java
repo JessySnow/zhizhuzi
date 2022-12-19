@@ -1,6 +1,7 @@
 package acgn.jessysnow.core;
 
 import acgn.jessysnow.helper.PrintContentHandler;
+import acgn.jessysnow.helper.UAHelper;
 import acgn.jessysnow.http.HttpChannelInitializer;
 import acgn.jessysnow.pojo.CrawlTask;
 import io.netty.bootstrap.Bootstrap;
@@ -9,13 +10,10 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLException;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
@@ -103,6 +101,8 @@ public class NettyClientEngine implements ClientEngine{
         }
     }
 
+    // FIXME UA 头部的问题
+    //  非SSL : 使用 UA 字段会导致重定向，这个需要使用一个 Handler 来进行拦截，不能让他进入到 BizHandler
     @Override
     public void execute(CrawlTask task) {
         if(this.bootstrap.config().group().isShutdown()){
@@ -116,6 +116,20 @@ public class NettyClientEngine implements ClientEngine{
             public void operationComplete(ChannelFuture channelFuture) throws Exception {
                 DefaultFullHttpRequest request = new DefaultFullHttpRequest(task.getHttpVersion(), task.getMethod(),
                         task.getUri().toASCIIString());
+                // Host
+                request.headers().set(HttpHeaderNames.HOST, task.getHost());
+                // UA
+                request.headers().set(HttpHeaderNames.USER_AGENT,
+                        task.getUserAgent() == null || task.getUserAgent().isBlank()
+                                ? UAHelper.getRandomUserAgent()
+                                : task.getUserAgent());
+                // Cookies
+                if(task.getCookie() != null && !task.getCookie().isBlank()){
+                   request.headers().set(HttpHeaderNames.COOKIE, task.getCookie());
+                }
+
+                // FIXME DELETE IT
+                log.error("{}\n",request);
                 channelFuture.channel().writeAndFlush(request);
             }
         });
@@ -170,8 +184,13 @@ public class NettyClientEngine implements ClientEngine{
          *      print http-response's content to console
          * @return a ClientEngine for junit test
          */
-        public NettyClientEngine buildDefaultTestEngine() throws SSLException {
-            NettyClientEngine engine = this.buildDefaultEngine();
+        public NettyClientEngine bootDefaultTestEngine(boolean ssl) throws SSLException {
+            NettyClientEngine engine;
+            if(!ssl) {
+                engine = this.buildDefaultEngine();
+            }else {
+                engine = this.buildSSLEngine();
+            }
             engine.boot(new HttpChannelInitializer(engine.ssl, engine.compress, new PrintContentHandler()));
             return engine;
         }
