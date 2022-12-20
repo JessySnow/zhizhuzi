@@ -122,5 +122,8 @@ public enum NodeTagName {
     ul,
     var,
     video,
-    wbr;
+    wbr,
+
+    // Represents #text and #document node name
+    _text, _document;
 }

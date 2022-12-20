@@ -19,8 +19,9 @@ public @interface Node {
     String nodeId() default "";
     String nodeClassName() default "";
     NodeTagName nodeTagName() default NULL;
+    String nodeAttr() default "";
 
     // Priority order
-    int order() default -1;
+    int order() default 0;
     int bias() default 0; // bias from top
 }

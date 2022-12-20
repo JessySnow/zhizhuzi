@@ -3,14 +3,18 @@ package acgn.jessysnow.jsoup.parser;
 import acgn.jessysnow.common.exception.UnsupportedTypeException;
 import acgn.jessysnow.jsoup.annotation.Node;
 import acgn.jessysnow.jsoup.annotation.Nodes;
+import acgn.jessysnow.jsoup.enums.NodeTagName;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import lombok.extern.log4j.Log4j2;
+import static org.apache.commons.lang3.StringUtils.*;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Optional;
 
 
 // FIXME printstacktrace 的效率问题
@@ -31,13 +35,13 @@ public class DomParser implements Parser{
     public WebSite parse(Document html, WebSite site) {
         Element root = html;
 
-        Field[] fields = site.getClass().getFields();
+        Field[] fields = site.getClass().getDeclaredFields();
         for(Field f : fields){
             Class<?> type = f.getType();
             Annotation[] annotations = f.getDeclaredAnnotations();
             Nodes nodes = null;
             for(Annotation annotation : annotations){
-                if(annotation.annotationType().equals(Node.class)){
+                if(annotation.annotationType().equals(Nodes.class)){
                     nodes = (Nodes) annotation;
                     break;
                 }
@@ -48,7 +52,6 @@ public class DomParser implements Parser{
 
             f.setAccessible(true);
             Object res = null;
-            // TODO SET FIELD
             if(type.equals(String.class)){
                 // Single values
                 res = (Object) this.parseSingle(html, nodes);
@@ -75,9 +78,46 @@ public class DomParser implements Parser{
     }
 
 
-    // TODO Finish it
     private String parseSingle(Document html, Nodes nodes){
-        throw new UnsupportedOperationException("Not ready");
+        String res = null;
+        Element index = html;
+        Node[] nodeArray = nodes.domNodes();
+        for (Node node : nodeArray){
+            // Parse failed, set field to null
+            if(index == null){
+                res = null;
+                break;
+            }
+            if (isNotBlank(node.nodeId())){
+                index = index.getElementById(node.nodeId());
+            }else if (isNotBlank(node.nodeClassName())){
+                // If the order is not specified, get the first one
+                Elements elementsByClass = index.getElementsByClass(node.nodeClassName());
+                if (elementsByClass.size() == 0){
+                    res = null;
+                    break;
+                }
+                index = elementsByClass.get(node.order());
+            }else if(!node.nodeTagName().name().equals("NULL")){
+                if (node.nodeTagName().equals(NodeTagName._text)){
+                    res = index.text();
+                    break;
+                }else if (node.nodeTagName().equals(NodeTagName._document)){
+                    // Bozo operation
+                    index = index.ownerDocument();
+                }else {
+                    Elements elementsByTag = index.getElementsByTag(node.nodeTagName().name());
+                    index = elementsByTag.get(node.order());
+                }
+            }else {
+                if(isBlank(node.nodeAttr())){
+                    res = null;
+                    break;
+                }
+                res = index.attr(node.nodeAttr());
+            }
+        }
+        return res;
     }
 
     // TODO Finish it
