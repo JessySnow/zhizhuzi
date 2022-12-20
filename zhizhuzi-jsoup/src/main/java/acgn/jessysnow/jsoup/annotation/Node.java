@@ -23,5 +23,5 @@ public @interface Node {
 
     // Priority order
     int order() default 0;
-    int bias() default 0; // bias from top
+    int bias() default 0; // bias from top, supported in list search
 }

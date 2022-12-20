@@ -6,6 +6,8 @@ import acgn.jessysnow.jsoup.enums.NodeTagName;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import lombok.Getter;
 
+import java.util.List;
+
 
 /**
  * HTML source code of this website
@@ -26,39 +28,48 @@ import lombok.Getter;
 public class SimpleHtml extends WebSite {
     @Nodes(domNodes = {
             @Node(nodeTagName = NodeTagName.head),
-            @Node(nodeTagName = NodeTagName.title),
-            @Node(nodeTagName = NodeTagName._text)
+                @Node(nodeTagName = NodeTagName.title),
+                    @Node(nodeTagName = NodeTagName._text)
     })
     @Getter
     private String title;
 
     @Nodes(domNodes = {
             @Node(nodeTagName = NodeTagName.body),
-            @Node(nodeTagName = NodeTagName.p),
-            @Node(nodeTagName = NodeTagName._text)
+                @Node(nodeTagName = NodeTagName.p),
+                    @Node(nodeTagName = NodeTagName._text)
     })
     @Getter
     private String Welcome;
 
     @Nodes(domNodes = {
             @Node(nodeTagName = NodeTagName.body),
-            @Node(nodeTagName = NodeTagName.p, order = 1),
-            @Node(nodeTagName = NodeTagName._text)
+                @Node(nodeTagName = NodeTagName.p, order = 1),
+                    @Node(nodeTagName = NodeTagName._text)
     })
     @Getter
     private String WelcomeTwice;
 
     @Nodes(domNodes = {
             @Node(nodeId = "taobao_a"),
-            @Node(nodeTagName = NodeTagName._text)
+                @Node(nodeTagName = NodeTagName._text)
     })
     @Getter
     private String outerLinkTaoBaoText;
 
     @Nodes(domNodes = {
             @Node(nodeId = "taobao_a"),
-            @Node(nodeAttr = "href")
+                @Node(nodeAttr = "href")
     })
     @Getter
     private String outerLinkTaobaoLink;
+
+    @Nodes(domNodes = {
+            @Node(nodeTagName = NodeTagName.body),
+                @Node(nodeClassName = "multi_div"),
+                    @Node(nodeTagName = NodeTagName.a),
+                        @Node(nodeAttr = "href")
+    })
+    @Getter
+    private List<String> allLinks;
 }

@@ -13,8 +13,7 @@ import org.jsoup.select.Elements;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 // FIXME printstacktrace 的效率问题
@@ -120,8 +119,76 @@ public class DomParser implements Parser{
         return res;
     }
 
-    // TODO Finish it
     private List<String> parseMulti(Document html, Nodes nodes){
-        throw new UnsupportedOperationException("Not ready");
+        Deque<Elements> queue = new ArrayDeque<>();
+        List<String> res = new ArrayList<>();
+        Node[] nodeArray = nodes.domNodes();
+        if(nodeArray == null || nodeArray.length == 0){
+            return null;
+        }
+
+        // First node enqueue
+        Node firstNode = nodeArray[0];
+        Elements elements = fetchElementByNode(html, firstNode);
+        // First node broken
+        if (elements == null && !firstNode.nodeTagName().equals(NodeTagName._text)
+                && firstNode.nodeAttr().equals("")
+            ){
+            return null;
+        }
+        queue.offer(elements);
+
+        // BFS DOM Tree
+        for (int i = 1; i < nodeArray.length; ++ i){
+            Node node = nodeArray[i];
+            if (queue.size() > 0){
+                int size = queue.size();
+                for (int j = 0; j < size; j++) {
+                    Elements elementsParent = queue.poll();
+                    for (Element e : elementsParent){
+                        Elements elementsSon = fetchElementByNode(e, node);
+                        // Cut off node chain in this element
+                        if(elementsSon == null && node.nodeTagName().equals(NodeTagName._text)
+                        || !node.nodeAttr().equals("")){
+                            if (node.nodeTagName().equals(NodeTagName._text)){
+                                res.add(elementsParent.text());
+                            }else {
+                                res.add(elementsParent.attr(node.nodeAttr()));
+                            }
+                        }else if (elementsSon != null){
+                            queue.offer(elementsSon);
+                        }
+                    }
+                }
+            }
+        }
+
+        return res;
+    }
+
+    private Elements fetchElementByNode(Element element, Node node){
+        if(isNotBlank(node.nodeId())){
+            Element e = element.getElementById(node.nodeId());
+            if(e != null){
+                return new Elements(e);
+            }else {
+                return null;
+            }
+        }else if(isNotBlank(node.nodeClassName())){
+            Elements elements = element.getElementsByClass(node.nodeClassName());
+            return elements;
+        }else if (!node.nodeTagName().name().equals("NULL")){
+            if (node.nodeTagName().equals(NodeTagName._text)){
+                return null;
+            }else if (node.nodeTagName().equals(NodeTagName._document)){
+                new UnsupportedTypeException("Can't apply #document tagName to multi search").printStackTrace();
+            }else {
+                return element.getElementsByTag(node.nodeTagName().name());
+            }
+        }else{
+            return null;
+        }
+
+        return null;
     }
 }
