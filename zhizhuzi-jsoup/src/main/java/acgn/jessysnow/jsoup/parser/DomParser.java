@@ -16,7 +16,6 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 
-// FIXME printstacktrace 的效率问题
 /**
  * Parser a Html document by HTML DOM-Tree
  * Thread safe util class
@@ -32,8 +31,6 @@ public class DomParser implements Parser{
      */
     @Override
     public WebSite parse(Document html, WebSite site) {
-        Element root = html;
-
         Field[] fields = site.getClass().getDeclaredFields();
         for(Field f : fields){
             Class<?> type = f.getType();
@@ -61,7 +58,7 @@ public class DomParser implements Parser{
                 try {
                     throw new UnsupportedTypeException("Un");
                 } catch (UnsupportedTypeException e) {
-                    e.printStackTrace();
+                    log.error(e);
                 }
             }
 
@@ -69,7 +66,7 @@ public class DomParser implements Parser{
             try {
                 f.set(site, res);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                log.error(e);
             }
         }
 
@@ -175,13 +172,12 @@ public class DomParser implements Parser{
                 return null;
             }
         }else if(isNotBlank(node.nodeClassName())){
-            Elements elements = element.getElementsByClass(node.nodeClassName());
-            return elements;
+            return element.getElementsByClass(node.nodeClassName());
         }else if (!node.nodeTagName().name().equals("NULL")){
             if (node.nodeTagName().equals(NodeTagName._text)){
                 return null;
             }else if (node.nodeTagName().equals(NodeTagName._document)){
-                new UnsupportedTypeException("Can't apply #document tagName to multi search").printStackTrace();
+                log.error(new UnsupportedTypeException("Can't apply #document tagName to multi search"));
             }else {
                 return element.getElementsByTag(node.nodeTagName().name());
             }
