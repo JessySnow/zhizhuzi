@@ -103,6 +103,7 @@ public class NettyClientEngine implements ClientEngine{
 
     // FIXME UA 头部的问题
     //  非SSL : 使用 UA 字段会导致重定向，这个需要使用一个 Handler 来进行拦截，不能让他进入到 BizHandler
+    //  非SSL : 部分的服务器即使未使用 UA 也依然会使用重定向到 https 上
     @Override
     public void execute(CrawlTask task) {
         if(this.bootstrap.config().group().isShutdown()){
