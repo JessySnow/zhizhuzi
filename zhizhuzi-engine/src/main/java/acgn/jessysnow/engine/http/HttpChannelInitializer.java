@@ -1,5 +1,6 @@
 package acgn.jessysnow.engine.http;
 
+import acgn.jessysnow.helper.SslHelper;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
@@ -30,15 +31,11 @@ public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
     private final boolean ssl;
     private final boolean compress;
     private Consumer<ChannelHandlerContext> strategy;
-    private SslContext sslContext;
     private ChannelInboundHandlerAdapter bizHandler;
 
     public HttpChannelInitializer(boolean ssl, boolean compress) throws SSLException {
         this.ssl = ssl;
         this.compress = compress;
-        if(ssl){
-            this.sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
-        }
     }
 
     public HttpChannelInitializer(boolean ssl, boolean compress, Consumer<ChannelHandlerContext> strategy) throws SSLException {
@@ -54,7 +51,8 @@ public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         if(ssl) {
-            ch.pipeline().addLast("http-ssl", new SslHandler(sslContext.newEngine(ch.alloc()), true));
+//            ch.pipeline().addFirst("http-ssl", new SslHandler(sslContext.newEngine(ch.alloc()), true));
+            ch.pipeline().addFirst("http-ssl", SslHelper.getHandler());
         }
         ch.pipeline().addLast("http-codec", new HttpClientCodec()).
                 addLast("http-aggregator", new HttpObjectAggregator(65536));

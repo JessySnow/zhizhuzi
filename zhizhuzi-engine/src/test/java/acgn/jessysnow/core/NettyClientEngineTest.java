@@ -15,7 +15,6 @@ class NettyClientEngineTest {
 
     /**
      * Download test, target : www.baidu.com
-     *                repeat : 2 times
      */
     private static final CrawlTask baiduTask;
     private static final CrawlTask taobaoTask;
@@ -37,8 +36,7 @@ class NettyClientEngineTest {
     }
 
 
-    // FIXME SSL Engine 无法输出, Default Engine 正常输出
-    // FIXME 原因 SSL Handler 处理后，Pipeline 触发了 ReadComplete 事件导致后续的 Read 事件无法传播
+    // FIXME SSL Engine 成功握手后并解密后无法获取将事件传播
     @Test
     public void testOnDefaultNettyClientEngine(){
         try {
