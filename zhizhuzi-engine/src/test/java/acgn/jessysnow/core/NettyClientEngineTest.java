@@ -35,7 +35,7 @@ class NettyClientEngineTest {
     }
 
 
-    // FIXME SSL Engine SSL Handler 会截断事件流的传播
+    // FIXME SSL Engine 成功握手后并解密后无法获取将事件传播
     @Test
     public void testOnDefaultNettyClientEngine(){
         try {
