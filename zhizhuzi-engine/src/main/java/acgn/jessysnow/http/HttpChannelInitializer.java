@@ -54,7 +54,7 @@ public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         if(ssl) {
-            ch.pipeline().addLast("http-ssl", new SslHandler(sslContext.newEngine(ch.alloc()), true));
+            ch.pipeline().addFirst("http-ssl", new SslHandler(sslContext.newEngine(ch.alloc()), true));
         }
         ch.pipeline().addLast("http-codec", new HttpClientCodec()).
                 addLast("http-aggregator", new HttpObjectAggregator(65536));

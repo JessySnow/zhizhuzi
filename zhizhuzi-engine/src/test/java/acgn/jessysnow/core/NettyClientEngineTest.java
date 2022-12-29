@@ -14,7 +14,6 @@ class NettyClientEngineTest {
 
     /**
      * Download test, target : www.baidu.com
-     *                repeat : 2 times
      */
     private static final CrawlTask baiduTask;
     private static final CrawlTask taobaoTask;
@@ -26,8 +25,8 @@ class NettyClientEngineTest {
                     HttpVersion.HTTP_1_1, HttpMethod.GET,
                     null, null, null);
 
-            taobaoTask =  new CrawlTask("www.taobao.com", 80,
-                    new URI("http://www.taobao.com/"),
+            taobaoTask =  new CrawlTask("www.taobao.com", 443,
+                    new URI("https://www.taobao.com/"),
                     HttpVersion.HTTP_1_1, HttpMethod.GET,
                     null, null, null);
         } catch (URISyntaxException e) {
@@ -36,14 +35,14 @@ class NettyClientEngineTest {
     }
 
 
-    // FIXME SSL Engine 无法输出, Default Engine 正常输出
+    // FIXME SSL Engine SSL Handler 会截断事件流的传播
     @Test
     public void testOnDefaultNettyClientEngine(){
         try {
             NettyClientEngine nettyClientEngine = new NettyClientEngine
                     .NettyEngineBuilder()
                     .bootDefaultTestEngine(true);
-            nettyClientEngine.execute(baiduTask);
+            nettyClientEngine.execute(taobaoTask);
 
             while (true){}
         }catch (Exception ignored){}
