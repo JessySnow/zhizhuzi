@@ -24,12 +24,12 @@ class NettyClientEngineTest {
             baiduTask = new CrawlTask("www.baidu.com", 443,
                     new URI("https://www.baidu.com/"),
                     HttpVersion.HTTP_1_1, HttpMethod.GET,
-                    null, null, null);
+                    null, null);
 
             taobaoTask =  new CrawlTask("www.taobao.com", 443,
                     new URI("https://www.taobao.com/"),
                     HttpVersion.HTTP_1_1, HttpMethod.GET,
-                    null, null, null);
+                    null, null);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

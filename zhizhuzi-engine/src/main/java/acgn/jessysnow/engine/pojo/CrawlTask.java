@@ -23,17 +23,13 @@ public class CrawlTask{
     private String cookie;
     private String userAgent;
 
-    // Defines the logic to consume a full http response
-    private Consumer<DefaultFullHttpResponse> logic;
-
     public CrawlTask(String host,
                      int port,
                      URI uri,
                      HttpVersion httpVersion,
                      HttpMethod method,
                      String cookie,
-                     String userAgent,
-                     Consumer<DefaultFullHttpResponse> logic) {
+                     String userAgent) {
         this.host = host;
         this.port = port;
         this.uri = uri;
@@ -41,7 +37,6 @@ public class CrawlTask{
         this.method = method;
         this.cookie = cookie;
         this.userAgent = userAgent;
-        this.logic = logic;
     }
 
     // Inherit info from a parent craw_task, uri is specified by its own
@@ -52,7 +47,6 @@ public class CrawlTask{
         this.method = parent.method;
         this.cookie = parent.cookie;
         this.userAgent = parent.userAgent;
-        this.logic = parent.logic;
         this.uri = parent.uri;
     }
 }
