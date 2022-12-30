@@ -21,10 +21,7 @@ import java.util.function.Consumer;
  *      - ssl : Add a SSLHandler to pipeline or not
  *      - compress : Add a HttpDecompress to pipeline or not
  *      - strategy : Logic to deal with exception thrown in channel pipeline, will be added at the tail of pipeline
- *      - sslContext : Ssl context to build ssl
  *      - bizHandler : Logic to consume the response of http request, will be added before pipeline's exception handler
- *
- *
  * SSLHandler(Optional) --> HttpCodec --> HttpAggregator --> HttpDecompress --> BizHandler(Optional) --> ExceptionHandler
  */
 public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
@@ -51,11 +48,10 @@ public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         if(ssl) {
-//            ch.pipeline().addFirst("http-ssl", new SslHandler(sslContext.newEngine(ch.alloc()), true));
             ch.pipeline().addFirst("http-ssl", SslHelper.getHandler());
         }
         ch.pipeline().addLast("http-codec", new HttpClientCodec()).
-                addLast("http-aggregator", new HttpObjectAggregator(65536));
+                addLast("http-aggregator", new HttpObjectAggregator(131072));
         if(compress){
             ch.pipeline().addLast("http-decompressor", new HttpContentDecompressor());
         }

@@ -36,7 +36,6 @@ class NettyClientEngineTest {
     }
 
 
-    // FIXME SSL Engine 成功握手后并解密后无法获取将事件传播
     @Test
     public void testOnDefaultNettyClientEngine(){
         try {
