@@ -43,6 +43,7 @@ class NettyClientEngineTest {
                     .bootDefaultTestEngine(true);) {
             nettyClientEngine.execute(taobaoTask);
             nettyClientEngine.execute(baiduTask);
+            Thread.sleep(5000);
         }catch (Exception ignored){}
     }
 }
