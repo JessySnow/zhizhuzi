@@ -7,7 +7,7 @@ import io.netty.channel.socket.SocketChannel;
 
 import java.util.function.Consumer;
 
-public interface ClientEngine {
+public interface ClientEngine extends AutoCloseable {
     // boot the http client
     void boot();
 

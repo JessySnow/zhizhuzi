@@ -44,6 +44,12 @@ public class NettyClientEngine implements ClientEngine{
         this.compress = compress;
     }
 
+    // Close engine
+    @Override
+    public void close() throws Exception {
+        this.workGroup.shutdownGracefully();
+    }
+
     /**
      * In this boot implement, simply close a channel and log the remote address of it
      * while an exception happens in the handler chains

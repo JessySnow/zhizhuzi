@@ -38,14 +38,11 @@ class NettyClientEngineTest {
 
     @Test
     public void testOnDefaultNettyClientEngine(){
-        try {
-            NettyClientEngine nettyClientEngine = new NettyClientEngine
+        try (NettyClientEngine nettyClientEngine = new NettyClientEngine
                     .NettyEngineBuilder()
-                    .bootDefaultTestEngine(true);
+                    .bootDefaultTestEngine(true);) {
             nettyClientEngine.execute(taobaoTask);
             nettyClientEngine.execute(baiduTask);
-
-            while (true){}
         }catch (Exception ignored){}
     }
 }
