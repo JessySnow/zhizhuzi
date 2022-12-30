@@ -51,7 +51,7 @@ public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
             ch.pipeline().addFirst("http-ssl", SslHelper.getHandler());
         }
         ch.pipeline().addLast("http-codec", new HttpClientCodec()).
-                addLast("http-aggregator", new HttpObjectAggregator(131072));
+                addLast("http-aggregator", new HttpObjectAggregator(524288));
         if(compress){
             ch.pipeline().addLast("http-decompressor", new HttpContentDecompressor());
         }

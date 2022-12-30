@@ -53,13 +53,10 @@ public class NettyClientEngine implements ClientEngine{
         try {
             this.bootstrap.group(workGroup)
                     .channel(NioSocketChannel.class)
-                    .handler(new HttpChannelInitializer(ssl, compress, new Consumer<ChannelHandlerContext>() {
-                        @Override
-                        public void accept(ChannelHandlerContext channelHandlerContext) {
-                            log.info("Exception in channel, which remote address is: {}, this channel will be closed later",
-                                    channelHandlerContext.channel().remoteAddress());
-                            channelHandlerContext.close();
-                        }
+                    .handler(new HttpChannelInitializer(ssl, compress, channelHandlerContext -> {
+                        log.info("Exception in channel, which remote address is: {}, this channel will be closed later",
+                                channelHandlerContext.channel().remoteAddress());
+                        channelHandlerContext.close();
                     }));
             if(this.optionSwitch != null) {
                 this.optionSwitch.forEach(bootstrap::option);
@@ -109,26 +106,23 @@ public class NettyClientEngine implements ClientEngine{
 
         // Flush back the request while tcp-connection is build
         bootstrap.connect(task.getHost(), task.getPort())
-                .addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture channelFuture) throws Exception {
-                DefaultFullHttpRequest request = new DefaultFullHttpRequest(task.getHttpVersion(), task.getMethod(),
-                        task.getUri().toASCIIString());
-                // Host
-                request.headers().set(HttpHeaderNames.HOST, task.getHost());
-                // UA
-                request.headers().set(HttpHeaderNames.USER_AGENT,
-                        task.getUserAgent() == null || task.getUserAgent().isBlank()
-                                ? UAHelper.getRandomUserAgent()
-                                : task.getUserAgent());
-                // Cookies
-                if(task.getCookie() != null && !task.getCookie().isBlank()){
-                   request.headers().set(HttpHeaderNames.COOKIE, task.getCookie());
-                }
+                .addListener((ChannelFutureListener) channelFuture -> {
+                    DefaultFullHttpRequest request = new DefaultFullHttpRequest(task.getHttpVersion(), task.getMethod(),
+                            task.getUri().toASCIIString());
+                    // Host
+                    request.headers().set(HttpHeaderNames.HOST, task.getHost());
+                    // UA
+                    request.headers().set(HttpHeaderNames.USER_AGENT,
+                            task.getUserAgent() == null || task.getUserAgent().isBlank()
+                                    ? UAHelper.getRandomUserAgent()
+                                    : task.getUserAgent());
+                    // Cookies
+                    if(task.getCookie() != null && !task.getCookie().isBlank()){
+                       request.headers().set(HttpHeaderNames.COOKIE, task.getCookie());
+                    }
 
-                channelFuture.channel().writeAndFlush(request);
-            }
-        });
+                    channelFuture.channel().writeAndFlush(request);
+                });
     }
 
     /**

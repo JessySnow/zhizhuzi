@@ -21,8 +21,8 @@ class NettyClientEngineTest {
 
     static {
         try {
-            baiduTask = new CrawlTask("www.baidu.com", 80,
-                    new URI("http://www.baidu.com/"),
+            baiduTask = new CrawlTask("www.baidu.com", 443,
+                    new URI("https://www.baidu.com/"),
                     HttpVersion.HTTP_1_1, HttpMethod.GET,
                     null, null, null);
 
@@ -43,6 +43,7 @@ class NettyClientEngineTest {
                     .NettyEngineBuilder()
                     .bootDefaultTestEngine(true);
             nettyClientEngine.execute(taobaoTask);
+            nettyClientEngine.execute(baiduTask);
 
             while (true){}
         }catch (Exception ignored){}
