@@ -8,10 +8,8 @@ import io.netty.channel.socket.SocketChannel;
 import java.util.function.Consumer;
 
 public interface ClientEngine extends AutoCloseable {
-    // boot the http client, with a customized pipeline handler
-    default void boot(ChannelInitializer<SocketChannel> initializer){
-        throw new UnsupportedOperationException();
-    }
+    // boot a request engine with a customized pipeline initializer
+    void boot(ChannelInitializer<SocketChannel> initializer);
 
     // execute a crawl task
     void execute(CrawlTask task);
