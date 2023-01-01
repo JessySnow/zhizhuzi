@@ -40,7 +40,7 @@ class NettyClientEngineTest {
     public void testOnDefaultNettyClientEngine(){
         try (NettyClientEngine nettyClientEngine = new NettyClientEngine
                     .NettyEngineBuilder()
-                    .bootDefaultTestEngine(true);) {
+                    .getPreBooteeDefaultTestEngine(true);) {
             nettyClientEngine.execute(taobaoTask);
             nettyClientEngine.execute(baiduTask);
             Thread.sleep(5000);

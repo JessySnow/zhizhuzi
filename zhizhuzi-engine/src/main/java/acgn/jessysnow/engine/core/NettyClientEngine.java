@@ -15,7 +15,6 @@ import lombok.extern.log4j.Log4j2;
 
 import javax.net.ssl.SSLException;
 import java.util.HashMap;
-import java.util.function.Consumer;
 
 /**
  * Netty implement of Http client engine
@@ -48,46 +47,6 @@ public class NettyClientEngine implements ClientEngine{
     @Override
     public void close() throws Exception {
         this.workGroup.shutdownGracefully();
-    }
-
-    /**
-     * In this boot implement, simply close a channel and log the remote address of it
-     * while an exception happens in the handler chains
-     */
-    @Override
-    public void boot() {
-        try {
-            this.bootstrap.group(workGroup)
-                    .channel(NioSocketChannel.class)
-                    .handler(new HttpChannelInitializer(ssl, compress, channelHandlerContext -> {
-                        log.info("Exception in channel, which remote address is: {}, this channel will be closed later",
-                                channelHandlerContext.channel().remoteAddress());
-                        channelHandlerContext.close();
-                    }));
-            if(this.optionSwitch != null) {
-                this.optionSwitch.forEach(bootstrap::option);
-            }
-        } catch (SSLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Customize exception strategy
-     * @param strategy exception strategy
-     */
-    @Override
-    public void boot(Consumer<ChannelHandlerContext> strategy) {
-        try {
-            this.bootstrap.group(workGroup)
-                    .channel(NioSocketChannel.class)
-                    .handler(new HttpChannelInitializer(ssl, compress, strategy));
-            if(this.optionSwitch != null) {
-                this.optionSwitch.forEach(bootstrap::option);
-            }
-        } catch (SSLException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -180,7 +139,7 @@ public class NettyClientEngine implements ClientEngine{
          *      print http-response's content to console
          * @return a ClientEngine for junit test
          */
-        public NettyClientEngine bootDefaultTestEngine(boolean ssl) throws SSLException {
+        public NettyClientEngine getPreBooteeDefaultTestEngine(boolean ssl) throws SSLException {
             NettyClientEngine engine;
             if(!ssl) {
                 engine = this.buildDefaultEngine();
