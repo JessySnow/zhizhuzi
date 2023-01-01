@@ -1,6 +1,6 @@
 package acgn.jessysnow.engine.core;
 
-import acgn.jessysnow.engine.helper.PrintContentHandler;
+import acgn.jessysnow.engine.helper.TestHandler;
 import acgn.jessysnow.engine.helper.UAHelper;
 import acgn.jessysnow.engine.http.HttpChannelInitializer;
 import acgn.jessysnow.engine.pojo.CrawlTask;
@@ -89,10 +89,9 @@ public class NettyClientEngine implements ClientEngine{
      */
     public static class NettyEngineBuilder{
 
-        private static final HashMap<ChannelOption<Boolean>, Boolean> SO_OP_MAP;
+        private static final HashMap<ChannelOption<Boolean>, Boolean> SO_OP_MAP = new HashMap<>();
         static {
-            SO_OP_MAP = new HashMap<>();
-            SO_OP_MAP.put(ChannelOption.SO_KEEPALIVE, false);
+            SO_OP_MAP.put(ChannelOption.SO_KEEPALIVE, true);
             SO_OP_MAP.put(ChannelOption.TCP_NODELAY, true);
         }
 
@@ -140,7 +139,7 @@ public class NettyClientEngine implements ClientEngine{
             }else {
                 engine = this.buildSSLEngine();
             }
-            engine.boot(new HttpChannelInitializer(engine.ssl, engine.compress, new PrintContentHandler()));
+            engine.boot(new HttpChannelInitializer(engine.ssl, engine.compress, new TestHandler()));
             return engine;
         }
     }

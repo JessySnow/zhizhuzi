@@ -9,7 +9,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.util.CharsetUtil;
 
 @ChannelHandler.Sharable
-public class PrintContentHandler extends ChannelInboundHandlerAdapter {
+public class TestHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if(msg instanceof HttpResponse response){
