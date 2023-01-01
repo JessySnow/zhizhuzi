@@ -49,24 +49,18 @@ public class NettyClientEngine implements ClientEngine{
         this.workGroup.shutdownGracefully();
     }
 
-    /**
-     * Customize channel initializer
-     * @param initializer channel initializer
-     */
     @Override
     public void boot(ChannelInitializer<SocketChannel> initializer) {
         this.bootstrap.group(workGroup)
                 .channel(NioSocketChannel.class)
                 .handler(initializer);
-        if(this.optionSwitch != null) {
-            this.optionSwitch.forEach(bootstrap::option);
-        }
+        this.optionSwitch.forEach(bootstrap::option);
     }
 
     @Override
     public void execute(CrawlTask task) {
-        if(this.bootstrap.config().group().isShutdown()){
-            throw new RuntimeException("ClientEngine already closed");
+        if(this.bootstrap.group().isShutdown()){
+            throw new IllegalStateException("ClientEngine already closed");
         }
 
         // Flush back the request while tcp-connection is build
