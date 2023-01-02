@@ -15,6 +15,10 @@ import lombok.extern.log4j.Log4j2;
 
 import javax.net.ssl.SSLException;
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Netty implement of Http client engine
@@ -29,6 +33,8 @@ public class NettyClientEngine implements ClientEngine{
     // HTTP options
     private final boolean ssl;
     private final boolean compress;
+    // Executor service based pipeline
+    private final ExecutorService resultPipeline;
 
 
     private NettyClientEngine(int poolSize, boolean ssl, boolean compress,
@@ -38,6 +44,7 @@ public class NettyClientEngine implements ClientEngine{
         this.optionSwitch = optionSwitch;
         this.ssl = ssl;
         this.compress = compress;
+        this.resultPipeline = Executors.newCachedThreadPool();
     }
 
     // Close engine
