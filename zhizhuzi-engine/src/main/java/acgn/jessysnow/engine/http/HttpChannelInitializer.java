@@ -21,10 +21,10 @@ import java.util.function.Consumer;
  * SSLHandler(Optional) --> HttpCodec --> HttpAggregator --> HttpDecompress --> BizHandler(Optional) --> ExceptionHandler
  */
 public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
-    private final boolean ssl;
-    private final boolean compress;
-    private Consumer<ChannelHandlerContext> strategy;
-    private ChannelInboundHandlerAdapter bizHandler;
+    protected final boolean ssl;
+    protected final boolean compress;
+    protected Consumer<ChannelHandlerContext> strategy;
+    protected ChannelInboundHandlerAdapter bizHandler;
 
     public HttpChannelInitializer(boolean ssl, boolean compress) throws SSLException {
         this.ssl = ssl;

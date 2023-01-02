@@ -16,13 +16,11 @@ import java.util.function.Consumer;
 @ChannelHandler.Sharable
 public class CrawlHandler<T extends WebSite> extends ChannelInboundHandlerAdapter {
 
-    Class<T> clazz;
     private final ExecutorService resultPipeline;
     private final Consumer<T> consumeLogic;
 
-    public CrawlHandler(ExecutorService resultPipeline, Class<T> clazz, Consumer<T> consumeLogic){
+    public CrawlHandler(ExecutorService resultPipeline, Consumer<T> consumeLogic){
         this.resultPipeline = resultPipeline;
-        this.clazz = clazz;
         this.consumeLogic = consumeLogic;
     }
 
