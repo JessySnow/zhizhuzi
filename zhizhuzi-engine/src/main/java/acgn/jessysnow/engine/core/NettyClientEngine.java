@@ -24,8 +24,6 @@ public class NettyClientEngine implements ClientEngine{
     // Cached bootstrap
     private final Bootstrap bootstrap;
     private final NioEventLoopGroup workGroup;
-    // Reactor thread pool size
-    private final int poolSize;
     // Global Socket Option
     private final HashMap<ChannelOption<Boolean>, Boolean> optionSwitch;
     // HTTP options
@@ -38,14 +36,13 @@ public class NettyClientEngine implements ClientEngine{
         this.workGroup = new NioEventLoopGroup(poolSize);
         this.bootstrap = new Bootstrap();
         this.optionSwitch = optionSwitch;
-        this.poolSize = poolSize;
         this.ssl = ssl;
         this.compress = compress;
     }
 
     // Close engine
     @Override
-    public void close() throws Exception {
+    public void close(){
         this.workGroup.shutdownGracefully();
     }
 
@@ -59,7 +56,7 @@ public class NettyClientEngine implements ClientEngine{
 
     @Override
     public void execute(CrawlTask task) {
-        if(this.bootstrap.group().isShutdown()){
+        if(this.bootstrap.config().group().isShutdown()){
             throw new IllegalStateException("ClientEngine already closed");
         }
 
