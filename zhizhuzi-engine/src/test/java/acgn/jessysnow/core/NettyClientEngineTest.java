@@ -18,6 +18,7 @@ class NettyClientEngineTest {
      */
     private static final CrawlTask baiduTask;
     private static final CrawlTask taobaoTask;
+    private static final CrawlTask jdSearchTask;
 
     static {
         try {
@@ -30,6 +31,10 @@ class NettyClientEngineTest {
                     new URI("https://www.taobao.com/"),
                     HttpVersion.HTTP_1_1, HttpMethod.GET,
                     null, null);
+            jdSearchTask = new CrawlTask("search.jd.com", 443,
+                    new URI("https://search.jd.com/Search?keyword=分形工艺"),
+                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                    ,null, null);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -42,10 +47,11 @@ class NettyClientEngineTest {
             NettyClientEngine nettyClientEngine = new NettyClientEngine
                     .NettyEngineBuilder()
                     .bootDefaultTestEngine(true);
-            nettyClientEngine.execute(taobaoTask);
-            nettyClientEngine.execute(baiduTask);
+//            nettyClientEngine.execute(taobaoTask);
+//            nettyClientEngine.execute(baiduTask);
+            nettyClientEngine.execute(jdSearchTask);
 
-            while (true){}
+            Thread.sleep(5000);
         }catch (Exception ignored){}
     }
 }
