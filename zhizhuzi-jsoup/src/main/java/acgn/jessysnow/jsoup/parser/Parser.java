@@ -5,10 +5,9 @@ import org.jsoup.nodes.Document;
 
 /**
  * Super class(interface) of all parser
- * @param <T> Target website
  *
  * @see DomParser A parser impl of dom
  */
-public interface Parser{
-    WebSite parse(Document html, WebSite site);
+public interface Parser<T extends WebSite>{
+    T parse(Document html, T site);
 }

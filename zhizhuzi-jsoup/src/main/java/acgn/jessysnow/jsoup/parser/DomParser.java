@@ -21,7 +21,7 @@ import java.util.*;
  * Thread safe util class
  */
 @Log4j2
-public class DomParser implements Parser{
+public class DomParser<T extends WebSite> implements Parser<T>{
 
     /**
      * Parse site according to annotation on the field of site
@@ -30,7 +30,7 @@ public class DomParser implements Parser{
      * @return site
      */
     @Override
-    public WebSite parse(Document html, WebSite site) {
+    public T parse(Document html, T site) {
         Field[] fields = site.getClass().getDeclaredFields();
         for(Field f : fields){
             Class<?> type = f.getType();
@@ -50,16 +50,12 @@ public class DomParser implements Parser{
             Object res = null;
             if(type.equals(String.class)){
                 // Single values
-                res = (Object) this.parseSingle(html, nodes);
+                res =  this.parseSingle(html, nodes);
             }else if(type.equals(List.class)){
                 // Multi values
-                res = (Object) this.parseMulti(html, nodes);
+                res = this.parseMulti(html, nodes);
             }else {
-                try {
-                    throw new UnsupportedTypeException("Un");
-                } catch (UnsupportedTypeException e) {
-                    log.error(e);
-                }
+                log.error("Unsupported field type");
             }
 
             // Set field

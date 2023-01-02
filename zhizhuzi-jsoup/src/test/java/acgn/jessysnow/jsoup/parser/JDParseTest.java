@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public class JDParseTest {
-    private Parser parser = new DomParser();
+    private final Parser<JDHtml> parser = new DomParser<>();
     public static final Document html;
 
     static {
@@ -25,7 +25,6 @@ public class JDParseTest {
 
     @Test
     public void test(){
-        JDHtml jd = (JDHtml) parser.parse(html, new JDHtml());
-        System.out.println("SAFDF");
+        JDHtml jd = parser.parse(html, new JDHtml());
     }
 }

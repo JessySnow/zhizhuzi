@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DomParserTest {
-    private Parser parser = new DomParser();
+    private final Parser<SimpleHtml> parser = new DomParser<>();
     public static final Document html;
 
     static {
@@ -25,7 +25,7 @@ class DomParserTest {
 
     @Test
     public void testOnSimpleHtmlParse(){
-        SimpleHtml webSite = (SimpleHtml) parser.parse(html, new SimpleHtml());
+        SimpleHtml webSite = parser.parse(html, new SimpleHtml());
         assertEquals(webSite.getTitle(), "DOM 教程");
         assertEquals(webSite.getWelcome(), "Hello world!");
         assertEquals(webSite.getWelcomeTwice(), "Hello world! twice");

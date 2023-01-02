@@ -5,7 +5,9 @@ import acgn.jessysnow.engine.helper.UAHelper;
 import acgn.jessysnow.engine.http.HttpChannelInitializer;
 import acgn.jessysnow.engine.pojo.CrawlTask;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -17,8 +19,6 @@ import javax.net.ssl.SSLException;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Netty implement of Http client engine
