@@ -41,6 +41,14 @@ public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
         this.bizHandler = bizHandler;
     }
 
+    public HttpChannelInitializer(boolean ssl, boolean compress, ChannelInboundHandlerAdapter bizHandler,
+                                  Consumer<ChannelHandlerContext> strategy){
+        this.ssl = ssl;
+        this.compress = compress;
+        this.bizHandler = bizHandler;
+        this.strategy = strategy;
+    }
+
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         if(ssl) {

@@ -1,6 +1,5 @@
 package acgn.jessysnow.engine.http;
 
-import acgn.jessysnow.engine.core.CrawlHandler;
 import acgn.jessysnow.engine.helper.SslHelper;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.channel.ChannelHandlerContext;
@@ -15,20 +14,25 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
 public class CrawlChannelInitializer<T extends WebSite> extends HttpChannelInitializer {
-    private Consumer<T> consumerLogic;
-    private Class<T> clazz;
-    private ExecutorService resultPipeline;
+    private final Consumer<T> consumerLogic;
+    private final Class<T> clazz;
+    private final ExecutorService resultPipeline;
 
-    public CrawlChannelInitializer(boolean ssl, boolean compress) throws SSLException {
-        super(ssl, compress);
-    }
-
-    public CrawlChannelInitializer(boolean ssl, boolean compress, Consumer<ChannelHandlerContext> strategy) throws SSLException {
-        super(ssl, compress, strategy);
-    }
-
-    public CrawlChannelInitializer(boolean ssl, boolean compress, ChannelInboundHandlerAdapter bizHandler) throws SSLException {
-        super(ssl, compress, bizHandler);
+    /**
+     * BizHandler --> CrawlHandler
+     * @param ssl ssl support
+     * @param compress http-compress
+     * @param strategy exception handler
+     * @param consumerLogic logic to consume result item
+     * @param clazz WebSite class
+     * @param resultPipeline executor service based result pipeline
+     */
+    public CrawlChannelInitializer(boolean ssl, boolean compress, Consumer<ChannelHandlerContext> strategy,
+                                   Consumer<T> consumerLogic, Class<T> clazz, ExecutorService resultPipeline){
+        super(ssl, compress, null, strategy);
+        this.consumerLogic = consumerLogic;
+        this.clazz = clazz;
+        this.resultPipeline = resultPipeline;
     }
 
     @Override
@@ -41,5 +45,6 @@ public class CrawlChannelInitializer<T extends WebSite> extends HttpChannelIniti
         if(compress){
             ch.pipeline().addLast("http-decompressor", new HttpContentDecompressor());
         }
+
     }
 }
