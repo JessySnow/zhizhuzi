@@ -45,7 +45,7 @@ class NettyClientEngineTest {
     public void testOnDefaultNettyClientEngine(){
         try (NettyClientEngine nettyClientEngine = new NettyClientEngine
                     .NettyEngineBuilder()
-                    .getPreBooteeDefaultTestEngine(true);){
+                    .getDefaultTestEngine(true);){
 //            nettyClientEngine.execute(taobaoTask);
 //            nettyClientEngine.execute(baiduTask);
             nettyClientEngine.execute(jdSearchTask);

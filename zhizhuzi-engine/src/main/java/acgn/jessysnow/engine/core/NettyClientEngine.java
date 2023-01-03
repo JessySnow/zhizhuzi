@@ -2,10 +2,13 @@ package acgn.jessysnow.engine.core;
 
 import acgn.jessysnow.engine.helper.TestHandler;
 import acgn.jessysnow.engine.helper.UAHelper;
+import acgn.jessysnow.engine.http.CrawlChannelInitializer;
 import acgn.jessysnow.engine.http.HttpChannelInitializer;
 import acgn.jessysnow.engine.pojo.CrawlTask;
+import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -19,6 +22,7 @@ import javax.net.ssl.SSLException;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 /**
  * Netty implement of Http client engine
@@ -108,7 +112,7 @@ public class NettyClientEngine implements ClientEngine{
          *  - TCP-NoDelay : true
          * @return client engine have not booted
          */
-        public NettyClientEngine buildDefaultEngine(){
+        private NettyClientEngine buildDefaultEngine(){
             return new NettyClientEngine(Runtime.getRuntime().availableProcessors() * 2
                     , false
                     , true
@@ -124,11 +128,24 @@ public class NettyClientEngine implements ClientEngine{
          *  - TCP-NoDelay : true
          * @return client engine have not booted
          */
-        public NettyClientEngine buildSSLEngine(){
+        private NettyClientEngine buildSSLEngine(){
             return new NettyClientEngine(Runtime.getRuntime().availableProcessors()  * 2
                     , true
                     , true
                     , SO_OP_MAP);
+        }
+
+        public <T extends WebSite> NettyClientEngine getCrawlEngine(boolean ssl, boolean compress,
+                      Consumer<ChannelHandlerContext> strategy, Consumer<T> consumerLogic, Class<T> clazz){
+            NettyClientEngine engine;
+            if(ssl){
+                engine = this.buildSSLEngine();
+            }else {
+                engine = this.buildDefaultEngine();
+            }
+            engine.boot(new CrawlChannelInitializer<T>(ssl, compress, strategy,
+                    consumerLogic, clazz, engine.resultPipeline));
+            return engine;
         }
 
         /**
@@ -136,7 +153,7 @@ public class NettyClientEngine implements ClientEngine{
          *      print http-response's content to console
          * @return a ClientEngine for junit test
          */
-        public NettyClientEngine getPreBooteeDefaultTestEngine(boolean ssl) throws SSLException {
+        public NettyClientEngine getDefaultTestEngine(boolean ssl) throws SSLException {
             NettyClientEngine engine;
             if(!ssl) {
                 engine = this.buildDefaultEngine();
