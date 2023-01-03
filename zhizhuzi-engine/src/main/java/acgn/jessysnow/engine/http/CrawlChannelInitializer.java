@@ -1,5 +1,7 @@
 package acgn.jessysnow.engine.http;
 
+import acgn.jessysnow.engine.core.CrawlHandler;
+import acgn.jessysnow.engine.core.WebSiteConverter;
 import acgn.jessysnow.engine.helper.SslHelper;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.channel.ChannelHandlerContext;
@@ -8,18 +10,19 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
+import lombok.extern.log4j.Log4j2;
 
-import javax.net.ssl.SSLException;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
+@Log4j2
 public class CrawlChannelInitializer<T extends WebSite> extends HttpChannelInitializer {
     private final Consumer<T> consumerLogic;
     private final Class<T> clazz;
     private final ExecutorService resultPipeline;
 
     /**
-     * BizHandler --> CrawlHandler
+     * Replace BizHandler --> CrawlHandler
      * @param ssl ssl support
      * @param compress http-compress
      * @param strategy exception handler
@@ -45,6 +48,18 @@ public class CrawlChannelInitializer<T extends WebSite> extends HttpChannelIniti
         if(compress){
             ch.pipeline().addLast("http-decompressor", new HttpContentDecompressor());
         }
-
+        ch.pipeline().addLast(new WebSiteConverter<T>(clazz))
+                .addLast(new CrawlHandler<T>(resultPipeline, consumerLogic))
+                .addLast(new ChannelInboundHandlerAdapter(){
+                    @Override
+                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+                        if(strategy == null){
+                            ctx.channel().close();
+                            log.error(cause);
+                        }else {
+                            strategy.accept(ctx);
+                        }
+                    }
+                });
     }
 }

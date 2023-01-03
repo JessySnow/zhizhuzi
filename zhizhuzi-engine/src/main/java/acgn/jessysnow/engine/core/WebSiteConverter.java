@@ -17,7 +17,7 @@ import java.util.List;
 public class WebSiteConverter<T extends WebSite> extends MessageToMessageEncoder<HttpContent> {
     private final Class<T> clazz;
 
-    WebSiteConverter(Class<T> clazz){
+    public WebSiteConverter(Class<T> clazz){
         this.clazz = clazz;
     }
 
