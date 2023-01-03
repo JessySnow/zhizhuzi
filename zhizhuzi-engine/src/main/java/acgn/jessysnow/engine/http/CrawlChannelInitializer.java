@@ -38,6 +38,10 @@ public class CrawlChannelInitializer<T extends WebSite> extends HttpChannelIniti
         this.resultPipeline = resultPipeline;
     }
 
+    /**
+     * SslHandler(Optional) --> HttpCodec --> Http-Aggregator --> Http-Decompressor(Optional) --> WebSiteConverter
+     *          --> CrawlHandler --> ExceptionHandler
+     */
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         if(ssl){
