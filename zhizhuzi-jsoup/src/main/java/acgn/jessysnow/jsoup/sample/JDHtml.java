@@ -20,7 +20,7 @@ public class JDHtml extends WebSite {
                                         @Node(nodeClassName = "gl-warp"),
                                             @Node(nodeTagName = NodeTagName.li),
                                                 @Node(nodeTagName = NodeTagName.div),
-                                                    @Node(nodeTagName = NodeTagName.div),
+                                                    @Node(nodeClassName = "p-price"),
                                                         @Node(nodeTagName = NodeTagName.strong),
                                                             @Node(nodeTagName = NodeTagName.i),
                                                                 @Node(nodeTagName = NodeTagName._text)

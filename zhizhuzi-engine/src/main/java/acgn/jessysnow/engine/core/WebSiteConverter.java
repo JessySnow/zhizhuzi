@@ -3,6 +3,7 @@ package acgn.jessysnow.engine.core;
 import acgn.jessysnow.jsoup.parser.DomParser;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.util.CharsetUtil;
@@ -14,7 +15,7 @@ import java.util.List;
 /**
  * Encode HttpContent to a website-pojo
  */
-public class WebSiteConverter<T extends WebSite> extends MessageToMessageEncoder<HttpContent> {
+public class WebSiteConverter<T extends WebSite> extends MessageToMessageDecoder<HttpContent> {
     private final Class<T> clazz;
 
     public WebSiteConverter(Class<T> clazz){
@@ -22,7 +23,7 @@ public class WebSiteConverter<T extends WebSite> extends MessageToMessageEncoder
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, HttpContent msg, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, HttpContent msg, List<Object> out) throws Exception {
         String response = msg.content().toString(CharsetUtil.UTF_8);
         Document document = Jsoup.parse(response);
         DomParser<T> parser = new DomParser<>();

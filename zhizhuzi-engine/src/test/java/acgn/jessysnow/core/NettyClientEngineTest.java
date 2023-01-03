@@ -2,6 +2,7 @@ package acgn.jessysnow.core;
 
 import acgn.jessysnow.engine.core.NettyClientEngine;
 import acgn.jessysnow.engine.pojo.CrawlTask;
+import acgn.jessysnow.jsoup.sample.RTX3060Ti;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import lombok.extern.log4j.Log4j2;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.function.Consumer;
 
 @Log4j2
 class NettyClientEngineTest {
@@ -51,5 +53,16 @@ class NettyClientEngineTest {
             nettyClientEngine.execute(jdSearchTask);
             Thread.sleep(5000);
         }catch (Exception ignored){}
+    }
+
+    @Test
+    public void testOnCrawlTask(){
+        try(NettyClientEngine nettyClientEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(
+                true, true, null,
+                rtx3060Ti -> System.out.println(rtx3060Ti.getPrice()),
+                RTX3060Ti.class)){
+            nettyClientEngine.execute(jdSearchTask);
+            while (true);
+        }catch (Exception ignored){;}
     }
 }
