@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.function.Consumer;
 
 @Log4j2
 class NettyClientEngineTest {
