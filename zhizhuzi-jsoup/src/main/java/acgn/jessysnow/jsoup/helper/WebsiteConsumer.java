@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Log4j2
 public class WebsiteConsumer {
-    public static void toConsole(WebSite webSite) throws IllegalAccessException {
+    public static void toConsole(WebSite webSite) {
         if (null == webSite){
             log.error("Can't consume a website which is null");
             return ;
@@ -33,11 +33,18 @@ public class WebsiteConsumer {
             }
 
             field.setAccessible(true);
-            Object o = field.get(webSite);
+            Object o = null;
+
+            // Do noting
+            try {
+                o = field.get(webSite);
+            } catch (IllegalAccessException ignored){}
+
+            _printIt(o, field);
         }
     }
 
-    private void _printIt(Object result, Field field){
+    private static void _printIt(Object result, Field field){
         if (result == null){
             log.error("{} field is null", field.getName());
             return ;
@@ -46,9 +53,8 @@ public class WebsiteConsumer {
         if (result.getClass().equals(String.class)){
             String fieldName = field.getName();
             System.out.printf("%s : %s", fieldName, result);
-        }else if (result instanceof List){
+        }else if (result instanceof List<?> list){
             System.out.println(field.getName());
-            List<?> list = ((List<?>) result);
             if (list.size() > 0 && !list.get(0).getClass().equals(String.class)){
                 log.error("{} field's type unsupported", field.getName());
             }

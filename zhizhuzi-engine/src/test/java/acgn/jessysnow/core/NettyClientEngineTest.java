@@ -2,6 +2,7 @@ package acgn.jessysnow.core;
 
 import acgn.jessysnow.engine.core.NettyClientEngine;
 import acgn.jessysnow.engine.pojo.CrawlTask;
+import acgn.jessysnow.jsoup.helper.WebsiteConsumer;
 import acgn.jessysnow.jsoup.sample.RTX3060Ti;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
@@ -58,11 +59,10 @@ class NettyClientEngineTest {
     @Test
     public void testOnCrawlTask(){
         try(NettyClientEngine nettyClientEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(
-                true, true, null,
-                rtx3060Ti -> System.out.println(rtx3060Ti.getPrice()),
+                true, true, null, WebsiteConsumer::toConsole,
                 RTX3060Ti.class)){
             nettyClientEngine.execute(jdSearchTask);
-            while (true);
+            Thread.sleep(5000);
         }catch (Exception ignored){;}
     }
 }
