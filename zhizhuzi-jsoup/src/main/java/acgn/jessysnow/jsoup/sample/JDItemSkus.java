@@ -4,21 +4,23 @@ import acgn.jessysnow.jsoup.annotation.Node;
 import acgn.jessysnow.jsoup.annotation.Nodes;
 import acgn.jessysnow.jsoup.enums.NodeTagName;
 import acgn.jessysnow.jsoup.pojo.WebSite;
+import lombok.Data;
 import lombok.Getter;
 
 import java.util.List;
 
+@Data
 public class JDItemSkus extends WebSite {
     @Nodes(domNodes = {
             @Node(nodeTagName = NodeTagName.body),
-            @Node(nodeId = "J_searchWrap"),
-            @Node(nodeId = "J_container"),
-            @Node(nodeId = "J_main"),
-            @Node(nodeClassName = "m-list"),
-            @Node(nodeClassName = "ml-wrap"),
-            @Node(nodeId = "J_goodsList"),
-            @Node(nodeClassName = "gl-warp"),
-            @Node(nodeTagName = NodeTagName.li),
+            @Node(nodeClassName = "w"),
+            @Node(nodeClassName = "product-intro clearfix"),
+            @Node(nodeClassName = "itemInfo-wrap"),
+            @Node(nodeClassName = "summary p-choose-wrap"),
+            @Node(nodeId = "choose-attrs"),
+            @Node(nodeId = "choose-attr-1"),
+            @Node(nodeClassName = "dd"),
+            @Node(nodeClassName = "item"),
             @Node(nodeAttr = "data-sku")
     })
     @Getter
