@@ -1,7 +1,7 @@
 package acgn.jessysnow.jsoup.parser;
 
-import acgn.jessysnow.jsoup.pojo.WebSite;
 import acgn.jessysnow.jsoup.sample.JDHtml;
+import acgn.jessysnow.jsoup.sample.JDItem;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;
@@ -26,5 +26,13 @@ public class JDParseTest {
     @Test
     public void test(){
         JDHtml jd = parser.parse(html, new JDHtml());
+    }
+
+    @Test
+    public void test_1() throws IOException {
+        File _file = new File("/Users/jessy/Downloads/jditem-sku.html");
+        Parser<JDItem> _parser = new DomParser<>();
+        JDItem parse = _parser.parse(Jsoup.parse(_file, StandardCharsets.UTF_8.name()), new JDItem());
+        System.out.println(parse);
     }
 }

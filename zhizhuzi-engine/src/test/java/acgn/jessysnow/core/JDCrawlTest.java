@@ -3,6 +3,7 @@ package acgn.jessysnow.core;
 import acgn.jessysnow.engine.core.NettyClientEngine;
 import acgn.jessysnow.engine.pojo.CrawlTask;
 import acgn.jessysnow.jsoup.helper.WebsiteConsumer;
+import acgn.jessysnow.jsoup.sample.JDItem;
 import acgn.jessysnow.jsoup.sample.JDItemSkus;
 import acgn.jessysnow.jsoup.sample.JDUrlSkus;
 import io.netty.handler.codec.http.HttpMethod;
@@ -35,6 +36,19 @@ public class JDCrawlTest {
                     HttpVersion.HTTP_1_1, HttpMethod.GET
                     ,null, null));
             Thread.sleep(5000);
+        }catch (Exception ignored){;}
+    }
+
+    @Test
+    public void test_item(){
+        try(NettyClientEngine nettyClientEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(
+                true, true, null, WebsiteConsumer::toConsole,
+                JDItem.class)){
+            nettyClientEngine.execute(new CrawlTask("item.jd.com", 443,
+                    new URI("https://item.jd.com/100048428267.html"),
+                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                    ,null, null));
+            while (true);
         }catch (Exception ignored){;}
     }
 }
