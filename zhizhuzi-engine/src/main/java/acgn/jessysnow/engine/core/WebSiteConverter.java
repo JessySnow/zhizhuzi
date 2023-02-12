@@ -4,7 +4,6 @@ import acgn.jessysnow.jsoup.parser.DomParser;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
-import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.util.CharsetUtil;
 import org.jsoup.Jsoup;
@@ -22,6 +21,8 @@ public class WebSiteConverter<T extends WebSite> extends MessageToMessageDecoder
         this.clazz = clazz;
     }
 
+    // Fixme For different content types, initialize different decoders and get the field type from clazz
+    // Todo Json field support
     @Override
     protected void decode(ChannelHandlerContext ctx, HttpContent msg, List<Object> out) throws Exception {
         String response = msg.content().toString(CharsetUtil.UTF_8);
