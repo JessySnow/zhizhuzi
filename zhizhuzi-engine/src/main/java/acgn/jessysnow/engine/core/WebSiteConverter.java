@@ -1,7 +1,9 @@
 package acgn.jessysnow.engine.core;
 
+import acgn.jessysnow.gson.pojo.Json;
 import acgn.jessysnow.jsoup.parser.DomParser;
 import acgn.jessysnow.jsoup.pojo.WebSite;
+import com.google.gson.Gson;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.HttpContent;
@@ -21,22 +23,21 @@ public class WebSiteConverter<T extends WebSite> extends MessageToMessageDecoder
         this.clazz = clazz;
     }
 
-    // Fixme
     @Override
     protected void decode(ChannelHandlerContext ctx, HttpContent msg, List<Object> out) throws Exception {
         String response = msg.content().toString(CharsetUtil.UTF_8);
 
         T res;
-//        if (clazz.isAssignableFrom(Json.class)){
-//            Gson gson = new Gson();
-//            res = gson.fromJson(response, clazz);
-//        }else if (clazz.isAssignableFrom(WebSite.class)) {
+        if (Json.class.isAssignableFrom(clazz)){
+            Gson gson = new Gson();
+            res = gson.fromJson(response, clazz);
+        }else if (WebSite.class.isAssignableFrom(clazz)) {
             Document document = Jsoup.parse(response);
             DomParser<T> parser = new DomParser<>();
             res = parser.parse(document, clazz.getConstructor().newInstance());
-//        }else {
-//            res = null;
-//        }
+        }else {
+            res = null;
+        }
 
         out.add(res);
     }
