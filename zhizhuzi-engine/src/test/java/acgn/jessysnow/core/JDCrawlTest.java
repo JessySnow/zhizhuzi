@@ -11,6 +11,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 public class JDCrawlTest {
     @Test
@@ -48,7 +49,52 @@ public class JDCrawlTest {
                     new URI("https://item.jd.com/100048428267.html"),
                     HttpVersion.HTTP_1_1, HttpMethod.GET
                     ,null, null));
-            while (true);
+            Thread.sleep(5000);
         }catch (Exception ignored){;}
+    }
+
+    @Test
+    public void testAllInOne() throws InterruptedException, URISyntaxException {
+//        NettyClientEngine itemInfoEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(true,
+//                true, null, System.out::println,JDPriceAndName.class);
+
+//        NettyClientEngine itemSkusEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(true,
+//                true, null,  skuPojo-> {
+//                    List<String> itemSkus = skuPojo.getItemSkus();
+//                    for (String sku : itemSkus){
+////                        try {
+////                            itemInfoEngine.execute(new CrawlTask("item-soa.jd.com", 443,
+////                                    new URI("https://item-soa.jd.com/getWareBusiness?skuId=" + sku),
+////                                    HttpVersion.HTTP_1_1, HttpMethod.GET
+////                                    ,null, null));
+////                        } catch (URISyntaxException e) {
+////                            throw new RuntimeException(e);
+////                        }
+//                        System.out.println(sku);
+//                    }
+//                },JDItemSkus.class);
+
+        NettyClientEngine entranceEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(true,
+                true, null, skuPojo -> {
+                    for (String sku : skuPojo.getUrlSkus()){
+//                        try {
+//                            CrawlTask task = new CrawlTask("item.jd.com", 443,
+//                                    new URI("https://item.jd.com/" + sku + ".html"),
+//                                    HttpVersion.HTTP_1_1, HttpMethod.GET
+//                                    ,null, null);
+//                            itemSkusEngine.execute(task);
+//                        } catch (URISyntaxException e) {
+//                            throw new RuntimeException(e);
+//                        }
+                        System.out.println(sku);
+                    }
+                },JDUrlSkus.class);
+
+        entranceEngine.execute(new CrawlTask("search.jd.com", 443,
+                new URI("https://search.jd.com/Search?keyword=机箱"),
+                HttpVersion.HTTP_1_1, HttpMethod.GET
+                ,null, null));
+
+        Thread.sleep(5000);
     }
 }

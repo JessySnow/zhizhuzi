@@ -6,14 +6,19 @@ import acgn.jessysnow.jsoup.annotation.Nodes;
 import acgn.jessysnow.jsoup.enums.NodeTagName;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import lombok.extern.log4j.Log4j2;
-import static org.apache.commons.lang3.StringUtils.*;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 
 /**
@@ -144,9 +149,9 @@ public class DomParser<T extends WebSite> implements Parser<T>{
                         if(elementsSon == null && node.nodeTagName().equals(NodeTagName._text)
                         || !node.nodeAttr().equals("")){
                             if (node.nodeTagName().equals(NodeTagName._text)){
-                                res.add(elementsParent.text());
+                                res.add(e.text());
                             }else {
-                                res.add(elementsParent.attr(node.nodeAttr()));
+                                res.add(e.attr(node.nodeAttr()));
                             }
                         }else if (elementsSon != null){
                             queue.offer(elementsSon);
