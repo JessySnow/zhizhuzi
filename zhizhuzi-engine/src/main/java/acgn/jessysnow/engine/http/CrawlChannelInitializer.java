@@ -60,8 +60,10 @@ public class CrawlChannelInitializer<T extends WebSite> extends HttpChannelIniti
                         if(strategy == null){
                             ctx.channel().close();
                             log.error(cause);
+                            ctx.channel().notify();
                         }else {
                             strategy.accept(ctx);
+                            ctx.channel().notify();
                         }
                     }
                 });

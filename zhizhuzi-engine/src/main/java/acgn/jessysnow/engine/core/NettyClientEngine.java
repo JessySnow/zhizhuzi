@@ -13,8 +13,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
 import lombok.extern.log4j.Log4j2;
 
 import javax.net.ssl.SSLException;
@@ -28,7 +26,6 @@ import java.util.function.Consumer;
  */
 @Log4j2
 public class NettyClientEngine implements ClientEngine{
-    public static final AttributeKey<Boolean> bizTag = AttributeKey.valueOf("biz-status");
 
     // Cached bootstrap
     private final Bootstrap bootstrap;
@@ -121,11 +118,12 @@ public class NettyClientEngine implements ClientEngine{
 
         // write and flush request to this channel
         future.channel().writeAndFlush(request);
-
-        // a tag hold channel's biz status
-        Attribute<Boolean> attr = future.channel().attr(bizTag);
-        attr.set(false);
-        while (!attr.get());
+        // synchronize on this channel
+        try {
+            synchronized (future.channel()){
+                future.channel().wait();
+            }
+        } catch (InterruptedException ignored) {}
     }
 
     /**
