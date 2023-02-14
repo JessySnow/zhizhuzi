@@ -93,13 +93,17 @@ public class NettyClientEngine implements ClientEngine{
                 });
     }
 
-    public void blockExecute(CrawlTask task) throws InterruptedException {
+    @Override
+    public void blockExecute(CrawlTask task) {
         if(this.bootstrap.config().group().isShutdown()){
             throw new IllegalStateException("ClientEngine already closed");
         }
 
         ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
-        future.sync(); // wait until tcp-connection is build
+        try {
+            future.sync(); // wait until tcp-connection is build
+            // exception handler's job
+        } catch (InterruptedException ignored) {}
 
         DefaultFullHttpRequest request = new DefaultFullHttpRequest(task.getHttpVersion(), task.getMethod(),
                 task.getUri().toASCIIString());
