@@ -55,4 +55,24 @@ public class JDCrawlTest {
                     ,null, null));
         }catch (Exception ignored){;}
     }
+
+    @Test
+    public void sslRepeatTest(){
+        try (NettyClientEngine itemEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(
+                true, true, null, WebsiteConsumer::toConsole,
+                JDItem.class);
+            NettyClientEngine skuEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(
+                    true, true, null, WebsiteConsumer::toConsole,
+                    JDUrlSkus.class);){
+
+            itemEngine.blockExecute(new CrawlTask("item.jd.com", 443,
+                    new URI("https://item.jd.com/100048428267.html"),
+                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                    ,null, null));
+            skuEngine.blockExecute(new CrawlTask("search.jd.com", 443,
+                    new URI("https://search.jd.com/Search?keyword=分形工艺"),
+                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                    ,null, null));
+        }catch (Exception ignored){;}
+    }
 }
