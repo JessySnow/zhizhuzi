@@ -7,15 +7,14 @@ import acgn.jessysnow.engine.http.HttpChannelInitializer;
 import acgn.jessysnow.engine.pojo.CrawlTask;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import lombok.extern.log4j.Log4j2;
 
 import javax.net.ssl.SSLException;
@@ -29,6 +28,8 @@ import java.util.function.Consumer;
  */
 @Log4j2
 public class NettyClientEngine implements ClientEngine{
+    public static final AttributeKey<Boolean> bizTag = AttributeKey.valueOf("biz-status");
+
     // Cached bootstrap
     private final Bootstrap bootstrap;
     private final NioEventLoopGroup workGroup;
@@ -90,6 +91,37 @@ public class NettyClientEngine implements ClientEngine{
 
                     channelFuture.channel().writeAndFlush(request);
                 });
+    }
+
+    public void blockExecute(CrawlTask task) throws InterruptedException {
+        if(this.bootstrap.config().group().isShutdown()){
+            throw new IllegalStateException("ClientEngine already closed");
+        }
+
+        ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
+        future.sync(); // wait until tcp-connection is build
+
+        DefaultFullHttpRequest request = new DefaultFullHttpRequest(task.getHttpVersion(), task.getMethod(),
+                task.getUri().toASCIIString());
+        // Host
+        request.headers().set(HttpHeaderNames.HOST, task.getHost());
+        // UA
+        request.headers().set(HttpHeaderNames.USER_AGENT,
+                task.getUserAgent() == null || task.getUserAgent().isBlank()
+                        ? UAHelper.getRandomUserAgent()
+                        : task.getUserAgent());
+        // Cookies
+        if(task.getCookie() != null && !task.getCookie().isBlank()){
+            request.headers().set(HttpHeaderNames.COOKIE, task.getCookie());
+        }
+
+        // write and flush request to this channel
+        future.channel().writeAndFlush(request);
+
+        // a tag hold channel's biz status
+        Attribute<Boolean> attr = future.channel().attr(bizTag);
+        attr.set(false);
+        while (!attr.get());
     }
 
     /**

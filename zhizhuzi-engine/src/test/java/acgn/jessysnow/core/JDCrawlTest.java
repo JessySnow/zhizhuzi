@@ -39,16 +39,16 @@ public class JDCrawlTest {
         }catch (Exception ignored){;}
     }
 
+    // A blocking crawl request test
     @Test
     public void test_item(){
         try(NettyClientEngine nettyClientEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(
                 true, true, null, WebsiteConsumer::toConsole,
                 JDItem.class)){
-            nettyClientEngine.execute(new CrawlTask("item.jd.com", 443,
+            nettyClientEngine.blockExecute(new CrawlTask("item.jd.com", 443,
                     new URI("https://item.jd.com/100048428267.html"),
                     HttpVersion.HTTP_1_1, HttpMethod.GET
                     ,null, null));
-            while (true);
         }catch (Exception ignored){;}
     }
 }
