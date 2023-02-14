@@ -57,13 +57,14 @@ public class CrawlChannelInitializer<T extends WebSite> extends HttpChannelIniti
                 .addLast(new ChannelInboundHandlerAdapter(){
                     @Override
                     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+                        synchronized (ctx.channel()){
+                            ctx.channel().notifyAll();
+                        }
                         if(strategy == null){
                             ctx.channel().close();
                             log.error(cause);
-                            ctx.channel().notify();
                         }else {
                             strategy.accept(ctx);
-                            ctx.channel().notify();
                         }
                     }
                 });

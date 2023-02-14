@@ -49,6 +49,10 @@ public class JDCrawlTest {
                     new URI("https://item.jd.com/100048428267.html"),
                     HttpVersion.HTTP_1_1, HttpMethod.GET
                     ,null, null));
+            nettyClientEngine.blockExecute(new CrawlTask("item.jd.com", 443,
+                    new URI("https://item.jd.com/100048428267.html"),
+                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                    ,null, null));
         }catch (Exception ignored){;}
     }
 }
