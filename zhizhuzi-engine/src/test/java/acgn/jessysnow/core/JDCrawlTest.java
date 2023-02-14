@@ -13,7 +13,8 @@ import org.junit.jupiter.api.Test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class JDCrawlTest {
     @Test
@@ -81,41 +82,48 @@ public class JDCrawlTest {
 
     @Test
     public void testAllInOne() throws InterruptedException, URISyntaxException {
+        //
+        Set<String> skuSet = new CopyOnWriteArraySet<>();
+
         NettyClientEngine itemInfoEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(true,
                 true, null, System.out::println, JDPriceAndName.class);
 
         NettyClientEngine itemSkusEngine =
                 new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(true,
                 true, null,  skuPojo-> {
-                    List<String> itemSkus = skuPojo.getItemSkus();
-                    for (String sku : itemSkus){
-                        System.out.println(sku);
-                        try {
-                            itemInfoEngine.execute(new CrawlTask("item-soa.jd.com", 443,
-                                    new URI("https://item-soa.jd.com/getWareBusiness?skuId=" + sku),
-                                    HttpVersion.HTTP_1_1, HttpMethod.GET
-                                    ,null, null));
-                        } catch (URISyntaxException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
+                    skuSet.addAll(skuPojo.getItemSkus());
                 },JDItemSkus.class);
 
         NettyClientEngine entranceEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(true,
                 true, null, skuPojo -> {
-                    for (String sku : skuPojo.getUrlSkus()){
-                        try {
-                            String url = "https://item.jd.com/" + sku + ".html";
-                            System.out.println(url);
-                            CrawlTask task = new CrawlTask("item.jd.com", 443,
-                                    new URI(url),
-                                    HttpVersion.HTTP_1_1, HttpMethod.GET
-                                    ,null, null);
-                            itemSkusEngine.execute(task);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
+                    skuSet.addAll(skuPojo.getUrlSkus());
                 },JDUrlSkus.class);
+
+
+        String itemName = "RTX4090";
+        String searchUrl = "https://search.jd.com/Search?keyword=" + itemName;
+        // get sku from search page
+        entranceEngine.blockExecute(new CrawlTask("search.jd.com", 443,
+                new URI(searchUrl),
+                HttpVersion.HTTP_1_1, HttpMethod.GET
+                ,null, null));
+
+        // get sku in item-detail page
+        for (String sku : skuSet){
+            String itemUrl = "https://item.jd.com/" + sku + ".html";
+            itemSkusEngine.blockExecute(new CrawlTask("item.jd.com", 443,
+                    new URI(itemUrl),
+                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                    ,null, null));
+        }
+
+        // get Item info
+        for (String sku : skuSet){
+            String itemInfoUrl = "https://item-soa.jd.com/getWareBusiness?skuId=" + sku;
+            itemInfoEngine.blockExecute(new CrawlTask("item-soa.jd.com", 443,
+                    new URI(itemInfoUrl),
+                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                    ,null, null));
+        }
     }
 }
