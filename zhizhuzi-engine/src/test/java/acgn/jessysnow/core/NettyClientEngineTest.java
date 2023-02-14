@@ -64,4 +64,9 @@ class NettyClientEngineTest {
             Thread.sleep(5000);
         }catch (Exception ignored){;}
     }
+
+    @Test
+    public void testOnJsonCrawlTask(){
+
+    }
 }

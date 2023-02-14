@@ -30,7 +30,7 @@ public class JDParseTest {
 
     @Test
     public void test_1() throws IOException {
-        File _file = new File("/Users/jessy/Downloads/jditem-sku.html");
+        File _file = new File("src/test/resources/html/jditem-sku.html");
         Parser<JDItem> _parser = new DomParser<>();
         JDItem parse = _parser.parse(Jsoup.parse(_file, StandardCharsets.UTF_8.name()), new JDItem());
         System.out.println(parse);

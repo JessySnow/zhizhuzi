@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
+import lombok.extern.log4j.Log4j2;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
@@ -11,20 +12,18 @@ import javax.net.ssl.SSLException;
 /**
  * Help to build ssl handler
  */
+@Log4j2
 public class SslHelper {
-    private static SSLEngine sslEngine;
-
-    static {
-        try {
-            SslContext sslContext = SslContextBuilder.forClient().build();
-            sslEngine = sslContext.newEngine(ByteBufAllocator.DEFAULT);
-        } catch (SSLException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
 
     public static SslHandler getHandler(){
-        return new SslHandler(sslEngine);
+        try {
+            SslContext sslContext = SslContextBuilder.forClient().build();
+            SSLEngine sslEngine = sslContext.newEngine(ByteBufAllocator.DEFAULT);
+            return new SslHandler(sslEngine);
+        } catch (SSLException e) {
+            log.error(e);
+            System.exit(1);
+        }
+        return null;
     }
 }

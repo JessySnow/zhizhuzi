@@ -2,6 +2,7 @@ package acgn.jessysnow.core;
 
 import acgn.jessysnow.engine.core.NettyClientEngine;
 import acgn.jessysnow.engine.pojo.CrawlTask;
+import acgn.jessysnow.gson.sample.JDPriceAndName;
 import acgn.jessysnow.jsoup.helper.WebsiteConsumer;
 import acgn.jessysnow.jsoup.sample.JDItem;
 import acgn.jessysnow.jsoup.sample.JDItemSkus;
@@ -11,6 +12,8 @@ import io.netty.handler.codec.http.HttpVersion;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 
 public class JDCrawlTest {
     @Test
@@ -39,16 +42,80 @@ public class JDCrawlTest {
         }catch (Exception ignored){;}
     }
 
+    // A blocking crawl request test
     @Test
     public void test_item(){
         try(NettyClientEngine nettyClientEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(
                 true, true, null, WebsiteConsumer::toConsole,
                 JDItem.class)){
-            nettyClientEngine.execute(new CrawlTask("item.jd.com", 443,
+            nettyClientEngine.blockExecute(new CrawlTask("item.jd.com", 443,
                     new URI("https://item.jd.com/100048428267.html"),
                     HttpVersion.HTTP_1_1, HttpMethod.GET
                     ,null, null));
-            while (true);
+            nettyClientEngine.blockExecute(new CrawlTask("item.jd.com", 443,
+                    new URI("https://item.jd.com/100048428267.html"),
+                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                    ,null, null));
         }catch (Exception ignored){;}
+    }
+
+    @Test
+    public void sslRepeatTest(){
+        try (NettyClientEngine itemEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(
+                true, true, null, WebsiteConsumer::toConsole,
+                JDItem.class);
+            NettyClientEngine skuEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(
+                    true, true, null, WebsiteConsumer::toConsole,
+                    JDUrlSkus.class);){
+
+            itemEngine.blockExecute(new CrawlTask("item.jd.com", 443,
+                    new URI("https://item.jd.com/100048428267.html"),
+                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                    ,null, null));
+            skuEngine.blockExecute(new CrawlTask("search.jd.com", 443,
+                    new URI("https://search.jd.com/Search?keyword=分形工艺"),
+                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                    ,null, null));
+        }catch (Exception ignored){;}
+    }
+
+    @Test
+    public void testAllInOne() throws InterruptedException, URISyntaxException {
+        NettyClientEngine itemInfoEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(true,
+                true, null, System.out::println, JDPriceAndName.class);
+
+        NettyClientEngine itemSkusEngine =
+                new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(true,
+                true, null,  skuPojo-> {
+                    List<String> itemSkus = skuPojo.getItemSkus();
+                    for (String sku : itemSkus){
+                        System.out.println(sku);
+                        try {
+                            itemInfoEngine.execute(new CrawlTask("item-soa.jd.com", 443,
+                                    new URI("https://item-soa.jd.com/getWareBusiness?skuId=" + sku),
+                                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                                    ,null, null));
+                        } catch (URISyntaxException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                },JDItemSkus.class);
+
+        NettyClientEngine entranceEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(true,
+                true, null, skuPojo -> {
+                    for (String sku : skuPojo.getUrlSkus()){
+                        try {
+                            String url = "https://item.jd.com/" + sku + ".html";
+                            System.out.println(url);
+                            CrawlTask task = new CrawlTask("item.jd.com", 443,
+                                    new URI(url),
+                                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                                    ,null, null);
+                            itemSkusEngine.execute(task);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                },JDUrlSkus.class);
     }
 }
