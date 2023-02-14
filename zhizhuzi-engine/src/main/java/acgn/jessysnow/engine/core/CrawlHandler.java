@@ -36,6 +36,9 @@ public class CrawlHandler<T extends WebSite> extends ChannelInboundHandlerAdapte
             @Override
             public void run() {
                 consumeLogic.accept(website);
+                synchronized (ctx.channel()){
+                    ctx.channel().notifyAll();
+                }
             }
         });
     }

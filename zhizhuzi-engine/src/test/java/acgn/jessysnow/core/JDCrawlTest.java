@@ -42,16 +42,40 @@ public class JDCrawlTest {
         }catch (Exception ignored){;}
     }
 
+    // A blocking crawl request test
     @Test
     public void test_item(){
         try(NettyClientEngine nettyClientEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(
                 true, true, null, WebsiteConsumer::toConsole,
                 JDItem.class)){
-            nettyClientEngine.execute(new CrawlTask("item.jd.com", 443,
+            nettyClientEngine.blockExecute(new CrawlTask("item.jd.com", 443,
                     new URI("https://item.jd.com/100048428267.html"),
                     HttpVersion.HTTP_1_1, HttpMethod.GET
                     ,null, null));
-            Thread.sleep(5000);
+            nettyClientEngine.blockExecute(new CrawlTask("item.jd.com", 443,
+                    new URI("https://item.jd.com/100048428267.html"),
+                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                    ,null, null));
+        }catch (Exception ignored){;}
+    }
+
+    @Test
+    public void sslRepeatTest(){
+        try (NettyClientEngine itemEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(
+                true, true, null, WebsiteConsumer::toConsole,
+                JDItem.class);
+            NettyClientEngine skuEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(
+                    true, true, null, WebsiteConsumer::toConsole,
+                    JDUrlSkus.class);){
+
+            itemEngine.blockExecute(new CrawlTask("item.jd.com", 443,
+                    new URI("https://item.jd.com/100048428267.html"),
+                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                    ,null, null));
+            skuEngine.blockExecute(new CrawlTask("search.jd.com", 443,
+                    new URI("https://search.jd.com/Search?keyword=分形工艺"),
+                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                    ,null, null));
         }catch (Exception ignored){;}
     }
 
