@@ -32,28 +32,27 @@
 ```java
 // Demo
 public class JDCrawlTest {
-    @Test
-    public void test_urlList(){
-        // Build a crawlengine from engine builder 
-        try(CrawlEngine<JDUrlSkus> engine = 
-                    new CrawlEngineBuilder<JDUrlSkus>(JDUrlSkus.class) // engine will get a JDUrlSKu pojo from HTML
-                            .ssl(true)  // SSL support
-                            .compress(true) // compress support
-                            .resConsumer(WebsiteConsumer::toConsole) // define how to consume pojo we crawl
-                            .build() // will return a CrawlEngine
-        ){
-            // Submit tasks in blocking mode
-            engine.blockExecute(new CrawlTask("search.jd.com", 443,
-                    new URI("https://search.jd.com/Search?keyword=分形工艺"),
-                    HttpVersion.HTTP_1_1, HttpMethod.GET
-                    ,null, null));
-            // Submit tasks in a non-blocking mode
-            engine.execute(new CrawlTask("search.jd.com", 443,
-                    new URI("https://search.jd.com/Search?keyword=分形工艺"),
-                    HttpVersion.HTTP_1_1, HttpMethod.GET
-                    ,null, null));
-        }catch (Exception ignored){;}
-    }
+   @Test
+   public void test_urlList(){
+      // more configuration about CrawlEngineBuilder, see CrawlEngineBuilder class
+      try(CrawlEngine<JDUrlSkus> engine =
+                  new CrawlEngineBuilder<>(JDUrlSkus.class) // engine will parse html to a JDUrlSkus Object
+                          .ssl(true)    // engine ssl support
+                          .compress(true)   // engine html-content compress support
+                          .resConsumer(WebsiteConsumer::toConsole)  // define how to consume pojo we just crawl
+                          .build() // return engine we build
+      ){
+          // submit task to engine in block mode
+         // more configuration about CrawlTask, see CrawlTask class
+         engine.blockExecute(new CrawlTask("https://search.jd.com/Search?keyword=GPW")); 
+      }catch (Exception ignored){}
+   }
 }
+```
+
+3. Easy and peasy get what we want in console
+```text
+urlSkus
+39689153276 10026493519952 100010255665 8753300 10060147618464 10060147618465 34312424914 10055418617931 10040458414309 10052873738457 100018123120 32921207364 10026488360177 10022946653369 10068182342803 10045384931160 10051774315894 41305680312 10027050953329 10027050953330 10068182342804 10031646184951 10049690328133 10068038009331 10067871522660 10028019288129 10033116126240 10026490619621 10033116126241 10034899387643 
 ```
 
