@@ -4,7 +4,6 @@ import acgn.jessysnow.jsoup.annotation.Node;
 import acgn.jessysnow.jsoup.annotation.Nodes;
 import acgn.jessysnow.jsoup.enums.NodeTagName;
 import acgn.jessysnow.jsoup.pojo.WebSite;
-import lombok.Getter;
 
 import java.util.List;
 
@@ -21,6 +20,5 @@ public class JDUrlSkus extends WebSite {
             @Node(nodeClassName = "gl-item"),
             @Node(nodeAttr = "data-sku")
     })
-    @Getter
     private List<String> urlSkus;
 }

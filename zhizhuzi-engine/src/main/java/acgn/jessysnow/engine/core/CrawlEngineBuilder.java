@@ -7,16 +7,16 @@ import io.netty.channel.ChannelHandlerContext;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
-public class EngineBuilder<T extends WebSite> {
-    private final NettyClientEngine<T> engine;
+public class CrawlEngineBuilder<T extends WebSite> {
+    private final CrawlEngine<T> engine;
     private final Class<T> clazz;
 
-    public EngineBuilder(Class<T> clazz){
-        this.engine = new NettyClientEngine<>();
+    public CrawlEngineBuilder(Class<T> clazz){
+        this.engine = new CrawlEngine<>();
         this.clazz = clazz;
     }
 
-    public NettyClientEngine<T> build(){
+    public CrawlEngine<T> build(){
         CrawlChannelInitializer<T> initializer = new CrawlChannelInitializer<T>(
                 engine.isSsl(), engine.isCompress(),
                 engine.getExpConsumer(), engine.getResConsumer(), clazz, engine.getResultPipeline());
@@ -24,43 +24,43 @@ public class EngineBuilder<T extends WebSite> {
         return this.engine;
     }
 
-    public EngineBuilder<T> ssl(boolean ssl){
+    public CrawlEngineBuilder<T> ssl(boolean ssl){
         engine.setSsl(ssl);
         return this;
     }
 
-    public EngineBuilder<T> compress(boolean compress){
+    public CrawlEngineBuilder<T> compress(boolean compress){
         engine.setCompress(compress);
         return this;
     }
 
-    public EngineBuilder<T> resultPipeline(ExecutorService resultPipeline){
+    public CrawlEngineBuilder<T> resultPipeline(ExecutorService resultPipeline){
         engine.setExecutorService(resultPipeline);
         return this;
     }
 
-    public EngineBuilder<T> refactorPoolSize(int poolSize){
+    public CrawlEngineBuilder<T> refactorPoolSize(int poolSize){
         engine.setRefactorPoolSize(poolSize);
         return this;
     }
 
-    public EngineBuilder<T> soKeepAlive(){
+    public CrawlEngineBuilder<T> soKeepAlive(){
         engine.soKeepAlive();
         return this;
     }
 
-    public EngineBuilder<T> tcpNoDelay(){
+    public CrawlEngineBuilder<T> tcpNoDelay(){
         engine.TCPNoDelay();
         return this;
     }
 
 
-    public EngineBuilder<T> expConsumer(Consumer<ChannelHandlerContext> expConsumer){
+    public CrawlEngineBuilder<T> expConsumer(Consumer<ChannelHandlerContext> expConsumer){
         this.engine.setExpConsumer(expConsumer);
         return this;
     }
 
-    public EngineBuilder<T> resConsumer(Consumer<T> resConsumer){
+    public CrawlEngineBuilder<T> resConsumer(Consumer<T> resConsumer){
         this.engine.setResConsumer(resConsumer);
         return this;
     }

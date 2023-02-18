@@ -1,7 +1,7 @@
 package acgn.jessysnow.core;
 
-import acgn.jessysnow.engine.core.EngineBuilder;
-import acgn.jessysnow.engine.core.NettyClientEngine;
+import acgn.jessysnow.engine.core.CrawlEngineBuilder;
+import acgn.jessysnow.engine.core.CrawlEngine;
 import acgn.jessysnow.engine.pojo.CrawlTask;
 import acgn.jessysnow.jsoup.helper.WebsiteConsumer;
 import acgn.jessysnow.jsoup.sample.JDUrlSkus;
@@ -15,7 +15,7 @@ import java.net.URI;
 public class JDCrawlTest {
     @Test
     public void test_urlList(){
-        try(NettyClientEngine<JDUrlSkus> engine = new EngineBuilder<JDUrlSkus>(JDUrlSkus.class).ssl(true)
+        try(CrawlEngine<JDUrlSkus> engine = new CrawlEngineBuilder<JDUrlSkus>(JDUrlSkus.class).ssl(true)
                     .compress(true).resConsumer(WebsiteConsumer::toConsole).build();
         ){
             engine.blockExecute(new CrawlTask("search.jd.com", 443,

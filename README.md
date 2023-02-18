@@ -8,51 +8,52 @@
 - zhizhuzi-gson : Json parser.
 
 ## User guide
-Step 1: Define a class to represent elements in HTML
-```java
-class JDItem extends WebSite {
-    // domNodes represent the hierarchical structure of elements in HTML 
-    @Nodes(domNodes = {
-            @Node(nodeTagName = NodeTagName.body),
-            @Node(nodeClassName = "w", order = 3),
-            @Node(nodeClassName = "product-intro clearfix"),
-            @Node(nodeClassName = "itemInfo-wrap"),
-            @Node(nodeClassName = "sku-name"),
-            @Node(nodeTagName = NodeTagName._text)
-    })
-    private String name;
+1. How to position HTML elements
+   - Use pojo and annotation
+  ```java
+    public class JDUrlSkus extends WebSite {
+        @Nodes(domNodes = {
+        @Node(nodeTagName = NodeTagName.body), // traverse to body
+        @Node(nodeId = "J_searchWrap"),        // traverse to one or more dom node with this id
+        @Node(nodeId = "J_container"),
+        @Node(nodeId = "J_main"),
+        @Node(nodeClassName = "m-list"),       // traverse to one or more dom node with this className
+        @Node(nodeClassName = "ml-wrap"),      
+        @Node(nodeId = "J_goodsList"),
+        @Node(nodeClassName = "gl-warp clearfix"),
+        @Node(nodeClassName = "gl-item"),
+        @Node(nodeAttr = "data-sku")            // get data-sku attribute from all candidate DOM node
+        })
+        private List<String> urlSkus;
+    }
+  ```
 
-    @Nodes(domNodes = {
-            @Node(nodeTagName = NodeTagName.body),
-            @Node(nodeClassName = "w", order = 3),
-            @Node(nodeClassName = "product-intro clearfix"),
-            @Node(nodeClassName = "itemInfo-wrap"),
-            @Node(nodeClassName = "summary summary-first"),
-            @Node(nodeClassName = "summary-price-wrap"),
-            @Node(nodeClassName = "summary-price J-summary-price"),
-            @Node(nodeClassName = "dd"),
-            @Node(nodeClassName = "p-price"),
-            @Node(nodeClassName = "price"),
-            @Node(nodeTagName = NodeTagName._text)
-    })
-    private String price;
+2. Crawl item's data-sku from search.jd.com
+```java
+// Demo
+public class JDCrawlTest {
+    @Test
+    public void test_urlList(){
+        // Build a crawlengine from engine builder 
+        try(CrawlEngine<JDUrlSkus> engine = 
+                    new CrawlEngineBuilder<JDUrlSkus>(JDUrlSkus.class) // engine will get a JDUrlSKu pojo from HTML
+                            .ssl(true)  // SSL support
+                            .compress(true) // compress support
+                            .resConsumer(WebsiteConsumer::toConsole) // define how to consume pojo we crawl
+                            .build() // will return a CrawlEngine
+        ){
+            // Submit tasks in blocking mode
+            engine.blockExecute(new CrawlTask("search.jd.com", 443,
+                    new URI("https://search.jd.com/Search?keyword=分形工艺"),
+                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                    ,null, null));
+            // Submit tasks in a non-blocking mode
+            engine.execute(new CrawlTask("search.jd.com", 443,
+                    new URI("https://search.jd.com/Search?keyword=分形工艺"),
+                    HttpVersion.HTTP_1_1, HttpMethod.GET
+                    ,null, null));
+        }catch (Exception ignored){;}
+    }
 }
 ```
 
-Step 2: Define a crawl task
-```java
-CrawlTask task = new CrawlTask("item.jd.com", 443,
-                    new URI("https://item.jd.com/100048428267.html"),
-                    HttpVersion.HTTP_1_1, HttpMethod.GET
-                    ,null, null));
-```
-
-Step 3: Submit the task and Class to an engine which get from engine builder, the util class WebsiteConsumer will print
-crawl result to console
-```java
-NettyClientEngine nettyClientEngine = new NettyClientEngine.NettyEngineBuilder().getCrawlEngine(
-                true, true, null, WebsiteConsumer::toConsole,
-                JDItem.class);
-
-nettyClientEngine.execute(task);
-```

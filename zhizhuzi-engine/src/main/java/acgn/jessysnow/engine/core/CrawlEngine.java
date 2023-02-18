@@ -22,7 +22,7 @@ import java.util.function.Consumer;
  * Netty implement of Http client engine
  */
 @Log4j2
-public class NettyClientEngine<T extends WebSite> implements ClientEngine{
+public class CrawlEngine<T extends WebSite> implements ClientEngine{
 
     // Cached bootstrap
     private final Bootstrap bootstrap = new Bootstrap();
@@ -43,9 +43,9 @@ public class NettyClientEngine<T extends WebSite> implements ClientEngine{
     private Consumer<ChannelHandlerContext> expConsumer;
 
     /**
-     * @see EngineBuilder
+     * @see CrawlEngineBuilder
      */
-    protected NettyClientEngine(){
+    protected CrawlEngine(){
         this.workGroup = new NioEventLoopGroup();
         this.ssl = false;
         this.compress = false;
