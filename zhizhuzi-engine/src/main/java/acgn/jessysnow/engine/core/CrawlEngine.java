@@ -113,10 +113,7 @@ public class CrawlEngine<T extends WebSite> implements ClientEngine{
                     // Host
                     request.headers().set(HttpHeaderNames.HOST, task.getHost());
                     // UA
-                    request.headers().set(HttpHeaderNames.USER_AGENT,
-                            task.getUserAgent() == null || task.getUserAgent().isBlank()
-                                    ? UAHelper.getRandomUserAgent()
-                                    : task.getUserAgent());
+                    request.headers().set(HttpHeaderNames.USER_AGENT, task.getUserAgent());
                     // Cookies
                     if(task.getCookie() != null && !task.getCookie().isBlank()){
                        request.headers().set(HttpHeaderNames.COOKIE, task.getCookie());
