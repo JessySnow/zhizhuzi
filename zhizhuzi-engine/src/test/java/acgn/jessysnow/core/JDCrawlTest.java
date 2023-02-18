@@ -14,7 +14,7 @@ public class JDCrawlTest {
         try(NettyClientEngine<JDUrlSkus> engine = new EngineBuilder<JDUrlSkus>(JDUrlSkus.class).ssl(true)
                     .compress(true).resConsumer(WebsiteConsumer::toConsole).build();
         ){
-            engine.blockExecute(new CrawlTask("https://search.jd.com/Search?keyword=分形工艺"));
+            engine.blockExecute(new CrawlTask("https://search.jd.com/Search?keyword=GPW"));
         }catch (Exception ignored){;}
     }
 }
