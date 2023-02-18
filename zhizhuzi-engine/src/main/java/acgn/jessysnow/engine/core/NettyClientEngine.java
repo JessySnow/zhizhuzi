@@ -1,9 +1,7 @@
 package acgn.jessysnow.engine.core;
 
-import acgn.jessysnow.engine.helper.TestHandler;
 import acgn.jessysnow.engine.helper.UAHelper;
 import acgn.jessysnow.engine.http.CrawlChannelInitializer;
-import acgn.jessysnow.engine.http.HttpChannelInitializer;
 import acgn.jessysnow.engine.pojo.CrawlTask;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.bootstrap.Bootstrap;
@@ -15,7 +13,6 @@ import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import lombok.extern.log4j.Log4j2;
 
-import javax.net.ssl.SSLException;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,31 +25,66 @@ import java.util.function.Consumer;
 public class NettyClientEngine implements ClientEngine{
 
     // Cached bootstrap
-    private final Bootstrap bootstrap;
-    private final NioEventLoopGroup workGroup;
+    private final Bootstrap bootstrap = new Bootstrap();
+    private NioEventLoopGroup workGroup;
     // Global Socket Option
-    private final HashMap<ChannelOption<Boolean>, Boolean> optionSwitch;
+    private final HashMap<ChannelOption<Boolean>, Boolean> optionSwitch = new HashMap<>();
     // HTTP options
-    private final boolean ssl;
-    private final boolean compress;
+    private boolean ssl;
+    private boolean compress;
     // Executor service based pipeline
-    private final ExecutorService resultPipeline;
+    private ExecutorService resultPipeline;
 
 
-    private NettyClientEngine(int poolSize, boolean ssl, boolean compress,
-                              HashMap<ChannelOption<Boolean>, Boolean> optionSwitch){
+    private NettyClientEngine(int poolSize, boolean ssl, boolean compress){
         this.workGroup = new NioEventLoopGroup(poolSize);
-        this.bootstrap = new Bootstrap();
-        this.optionSwitch = optionSwitch;
         this.ssl = ssl;
         this.compress = compress;
         this.resultPipeline = Executors.newCachedThreadPool();
     }
 
+    /**
+     * @see EngineBuilder
+     */
+    protected NettyClientEngine(){
+        this.workGroup = new NioEventLoopGroup();
+        this.ssl = false;
+        this.compress = false;
+        this.resultPipeline = Executors.newCachedThreadPool();
+    }
+
+    protected void setSsl(boolean ssl){
+        this.ssl = ssl;
+    }
+
+    protected void setCompress(boolean compress){
+        this.compress = compress;
+    }
+
+    protected void setExecutorService(ExecutorService resultPipeline){
+        this.resultPipeline = resultPipeline;
+    }
+
+    // default
+    protected void setRefactorPoolSize(int poolSize){
+        this.workGroup = new NioEventLoopGroup(poolSize);
+    }
+
+    // default false
+    protected void soKeepAlive(){
+        optionSwitch.put(ChannelOption.SO_KEEPALIVE, true);
+    }
+
+    // default false
+    protected void TCPNoDelay(){
+        optionSwitch.put(ChannelOption.TCP_NODELAY, true);
+    }
+
     // Close engine
     @Override
     public void close(){
-        this.workGroup.shutdownGracefully();
+        this.workGroup.shutdownGracefully()
+                .addListener(channelFuture -> log.info("Netty client engine auto-closed"));
     }
 
     @Override
@@ -150,7 +182,7 @@ public class NettyClientEngine implements ClientEngine{
             return new NettyClientEngine(Runtime.getRuntime().availableProcessors() * 2
                     , false
                     , true
-                    , SO_OP_MAP);
+            );
         }
 
         /**
@@ -166,7 +198,7 @@ public class NettyClientEngine implements ClientEngine{
             return new NettyClientEngine(Runtime.getRuntime().availableProcessors()  * 2
                     , true
                     , true
-                    , SO_OP_MAP);
+            );
         }
 
         public <T extends WebSite> NettyClientEngine getCrawlEngine(boolean ssl, boolean compress,
@@ -179,22 +211,6 @@ public class NettyClientEngine implements ClientEngine{
             }
             engine.boot(new CrawlChannelInitializer<T>(ssl, compress, strategy,
                     consumerLogic, clazz, engine.resultPipeline));
-            return engine;
-        }
-
-        /**
-         * only for unit test, pre-boot
-         *      print http-response's content to console
-         * @return a ClientEngine for junit test
-         */
-        public NettyClientEngine getDefaultTestEngine(boolean ssl) throws SSLException {
-            NettyClientEngine engine;
-            if(!ssl) {
-                engine = this.buildDefaultEngine();
-            }else {
-                engine = this.buildSSLEngine();
-            }
-            engine.boot(new HttpChannelInitializer(engine.ssl, engine.compress, new TestHandler()));
             return engine;
         }
     }
