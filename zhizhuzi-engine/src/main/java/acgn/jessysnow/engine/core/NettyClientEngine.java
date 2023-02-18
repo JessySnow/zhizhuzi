@@ -1,7 +1,6 @@
 package acgn.jessysnow.engine.core;
 
 import acgn.jessysnow.engine.helper.UAHelper;
-import acgn.jessysnow.engine.http.CrawlChannelInitializer;
 import acgn.jessysnow.engine.pojo.CrawlTask;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.bootstrap.Bootstrap;
@@ -11,6 +10,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.HashMap;
@@ -22,7 +22,7 @@ import java.util.function.Consumer;
  * Netty implement of Http client engine
  */
 @Log4j2
-public class NettyClientEngine implements ClientEngine{
+public class NettyClientEngine<T extends WebSite> implements ClientEngine{
 
     // Cached bootstrap
     private final Bootstrap bootstrap = new Bootstrap();
@@ -30,18 +30,17 @@ public class NettyClientEngine implements ClientEngine{
     // Global Socket Option
     private final HashMap<ChannelOption<Boolean>, Boolean> optionSwitch = new HashMap<>();
     // HTTP options
+    @Getter
     private boolean ssl;
+    @Getter
     private boolean compress;
     // Executor service based pipeline
+    @Getter
     private ExecutorService resultPipeline;
-
-
-    private NettyClientEngine(int poolSize, boolean ssl, boolean compress){
-        this.workGroup = new NioEventLoopGroup(poolSize);
-        this.ssl = ssl;
-        this.compress = compress;
-        this.resultPipeline = Executors.newCachedThreadPool();
-    }
+    @Getter
+    private Consumer<T> resConsumer;
+    @Getter
+    private Consumer<ChannelHandlerContext> expConsumer;
 
     /**
      * @see EngineBuilder
@@ -65,19 +64,24 @@ public class NettyClientEngine implements ClientEngine{
         this.resultPipeline = resultPipeline;
     }
 
-    // default
     protected void setRefactorPoolSize(int poolSize){
         this.workGroup = new NioEventLoopGroup(poolSize);
     }
 
-    // default false
     protected void soKeepAlive(){
         optionSwitch.put(ChannelOption.SO_KEEPALIVE, true);
     }
 
-    // default false
     protected void TCPNoDelay(){
         optionSwitch.put(ChannelOption.TCP_NODELAY, true);
+    }
+
+    protected void setResConsumer(Consumer<T> resConsumer){
+        this.resConsumer = resConsumer;
+    }
+
+    protected void setExpConsumer(Consumer<ChannelHandlerContext> expConsumer){
+        this.expConsumer = expConsumer;
     }
 
     // Close engine
@@ -156,62 +160,5 @@ public class NettyClientEngine implements ClientEngine{
                 future.channel().wait();
             }
         } catch (InterruptedException ignored) {}
-    }
-
-    /**
-     * Engine builder
-     */
-    public static class NettyEngineBuilder{
-
-        private static final HashMap<ChannelOption<Boolean>, Boolean> SO_OP_MAP = new HashMap<>();
-        static {
-            SO_OP_MAP.put(ChannelOption.SO_KEEPALIVE, true);
-            SO_OP_MAP.put(ChannelOption.TCP_NODELAY, true);
-        }
-
-        /**
-         * Default engine
-         *  - Reactor pool size : 2 * processor's number
-         *  - ssl : false, no ssl handler in pipeline
-         *  - compress : true
-         *  - Socket-KeepAlive : false
-         *  - TCP-NoDelay : true
-         * @return client engine have not booted
-         */
-        private NettyClientEngine buildDefaultEngine(){
-            return new NettyClientEngine(Runtime.getRuntime().availableProcessors() * 2
-                    , false
-                    , true
-            );
-        }
-
-        /**
-         * SSL engine
-         *  - Reactor pool size : 2 * processor's number
-         *  - ssl : true, ssl handler in the head of pipeline
-         *  - compress : true
-         *  - Socket-KeepAlive : false
-         *  - TCP-NoDelay : true
-         * @return client engine have not booted
-         */
-        private NettyClientEngine buildSSLEngine(){
-            return new NettyClientEngine(Runtime.getRuntime().availableProcessors()  * 2
-                    , true
-                    , true
-            );
-        }
-
-        public <T extends WebSite> NettyClientEngine getCrawlEngine(boolean ssl, boolean compress,
-                      Consumer<ChannelHandlerContext> strategy, Consumer<T> consumerLogic, Class<T> clazz){
-            NettyClientEngine engine;
-            if(ssl){
-                engine = this.buildSSLEngine();
-            }else {
-                engine = this.buildDefaultEngine();
-            }
-            engine.boot(new CrawlChannelInitializer<T>(ssl, compress, strategy,
-                    consumerLogic, clazz, engine.resultPipeline));
-            return engine;
-        }
     }
 }
