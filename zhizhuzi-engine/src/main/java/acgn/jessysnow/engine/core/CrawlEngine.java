@@ -1,6 +1,5 @@
 package acgn.jessysnow.engine.core;
 
-import acgn.jessysnow.engine.helper.UAHelper;
 import acgn.jessysnow.engine.pojo.CrawlTask;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.bootstrap.Bootstrap;
@@ -25,7 +24,8 @@ import java.util.function.Consumer;
 public class CrawlEngine<T extends WebSite> implements Engine {
 
     private final Bootstrap bootstrap = new Bootstrap();
-    private NioEventLoopGroup workGroup;
+    // TODO System native workgroup support
+    private EventLoopGroup workGroup;
     // Global Socket Option
     private final HashMap<ChannelOption<Boolean>, Boolean> optionSwitch = new HashMap<>();
     // HTTP options
@@ -83,6 +83,7 @@ public class CrawlEngine<T extends WebSite> implements Engine {
         this.expConsumer = expConsumer;
     }
 
+
     // Close engine
     @Override
     public void close(){
@@ -136,13 +137,11 @@ public class CrawlEngine<T extends WebSite> implements Engine {
 
         DefaultFullHttpRequest request = new DefaultFullHttpRequest(task.getHttpVersion(), task.getMethod(),
                 task.getUri().toASCIIString());
+
         // Host
         request.headers().set(HttpHeaderNames.HOST, task.getHost());
         // UA
-        request.headers().set(HttpHeaderNames.USER_AGENT,
-                task.getUserAgent() == null || task.getUserAgent().isBlank()
-                        ? UAHelper.getRandomUserAgent()
-                        : task.getUserAgent());
+        request.headers().set(HttpHeaderNames.USER_AGENT, task.getUserAgent());
         // Cookies
         if(task.getCookie() != null && !task.getCookie().isBlank()){
             request.headers().set(HttpHeaderNames.COOKIE, task.getCookie());
