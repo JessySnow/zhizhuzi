@@ -22,9 +22,8 @@ import java.util.function.Consumer;
  * Netty implement of Http client engine
  */
 @Log4j2
-public class CrawlEngine<T extends WebSite> implements ClientEngine{
+public class CrawlEngine<T extends WebSite> implements Engine {
 
-    // Cached bootstrap
     private final Bootstrap bootstrap = new Bootstrap();
     private NioEventLoopGroup workGroup;
     // Global Socket Option
