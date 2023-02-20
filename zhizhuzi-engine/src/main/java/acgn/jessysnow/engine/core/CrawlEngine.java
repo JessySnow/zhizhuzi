@@ -1,9 +1,13 @@
 package acgn.jessysnow.engine.core;
 
+import acgn.jessysnow.engine.helper.SysHelper;
 import acgn.jessysnow.engine.pojo.CrawlTask;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
+import io.netty.channel.epoll.EpollSocketChannel;
+import io.netty.channel.kqueue.KQueueEventLoopGroup;
+import io.netty.channel.kqueue.KQueueSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -24,7 +28,6 @@ import java.util.function.Consumer;
 public class CrawlEngine<T extends WebSite> implements Engine {
 
     private final Bootstrap bootstrap = new Bootstrap();
-    // TODO System native workgroup support
     private EventLoopGroup workGroup;
     // Global Socket Option
     private final HashMap<ChannelOption<Boolean>, Boolean> optionSwitch = new HashMap<>();
@@ -45,7 +48,7 @@ public class CrawlEngine<T extends WebSite> implements Engine {
      * @see CrawlEngineBuilder
      */
     protected CrawlEngine(){
-        this.workGroup = new NioEventLoopGroup();
+        this.workGroup = getWorkGroup(null);
         this.ssl = false;
         this.compress = false;
         this.resultPipeline = Executors.newCachedThreadPool();
@@ -64,7 +67,7 @@ public class CrawlEngine<T extends WebSite> implements Engine {
     }
 
     protected void setRefactorPoolSize(int poolSize){
-        this.workGroup = new NioEventLoopGroup(poolSize);
+        this.workGroup = getWorkGroup(poolSize);
     }
 
     protected void soKeepAlive(){
@@ -94,7 +97,9 @@ public class CrawlEngine<T extends WebSite> implements Engine {
     @Override
     public void boot(ChannelInitializer<SocketChannel> initializer) {
         this.bootstrap.group(workGroup)
-                .channel(NioSocketChannel.class)
+                .channel(this.workGroup instanceof NioEventLoopGroup ? NioSocketChannel.class :
+                        workGroup instanceof KQueueEventLoopGroup ? KQueueSocketChannel.class :
+                        EpollSocketChannel.class)
                 .handler(initializer);
         this.optionSwitch.forEach(bootstrap::option);
     }
@@ -155,5 +160,22 @@ public class CrawlEngine<T extends WebSite> implements Engine {
                 future.channel().wait();
             }
         } catch (InterruptedException ignored) {}
+    }
+
+    private EventLoopGroup getWorkGroup(Integer poolSize){
+        SysHelper.SysType sysType = SysHelper.getSysType();
+        poolSize = poolSize == null || poolSize == 0 ?
+                Runtime.getRuntime().availableProcessors() : poolSize;
+
+        EventLoopGroup res;
+        if (sysType == null || sysType == SysHelper.SysType.Windows){
+            res = new NioEventLoopGroup(poolSize);
+        }else if (sysType == SysHelper.SysType.MAC_OS_X || sysType == SysHelper.SysType.FreeBSD){
+            res = new KQueueEventLoopGroup(poolSize);
+        }else {
+            res = new NioEventLoopGroup(poolSize);
+        }
+
+        return res;
     }
 }
