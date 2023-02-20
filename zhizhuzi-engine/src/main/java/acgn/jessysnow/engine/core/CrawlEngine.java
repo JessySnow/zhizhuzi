@@ -128,6 +128,7 @@ public class CrawlEngine<T extends WebSite> implements Engine {
                 });
     }
 
+    //FIXME Use ChannelPromise
     @Override
     public void blockExecute(CrawlTask task) {
         if(this.bootstrap.config().group().isShutdown()){
