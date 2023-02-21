@@ -7,10 +7,10 @@ import com.google.gson.Gson;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.HttpContent;
-import io.netty.util.CharsetUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import java.nio.charset.Charset;
 import java.util.List;
 
 /**
@@ -18,14 +18,17 @@ import java.util.List;
  */
 public class WebSiteConverter<T extends WebSite> extends MessageToMessageDecoder<HttpContent> {
     private final Class<T> clazz;
+    private final String charSet;
 
-    public WebSiteConverter(Class<T> clazz){
+    public WebSiteConverter(Class<T> clazz, String charSet){
         this.clazz = clazz;
+        this.charSet = charSet;
     }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, HttpContent msg, List<Object> out) throws Exception {
-        String response = msg.content().toString(CharsetUtil.UTF_8);
+//        String response = msg.content().toString(StandardCharsets.UTF_8);
+        String response = msg.content().toString(Charset.forName(charSet));
 
         T res;
         if (Json.class.isAssignableFrom(clazz)){

@@ -36,6 +36,8 @@ public class CrawlEngine<T extends WebSite> implements Engine {
     private boolean ssl;
     @Getter
     private boolean compress;
+    @Getter
+    private String charSet = "UTF-8";
     // Executor service based pipeline
     @Getter
     private ExecutorService resultPipeline;
@@ -84,6 +86,9 @@ public class CrawlEngine<T extends WebSite> implements Engine {
 
     protected void setExpConsumer(Consumer<ChannelHandlerContext> expConsumer){
         this.expConsumer = expConsumer;
+    }
+    protected void setCharSet(String charSet){
+        this.charSet = charSet;
     }
 
 

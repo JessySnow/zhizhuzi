@@ -20,6 +20,7 @@ public class CrawlChannelInitializer<T extends WebSite> extends HttpChannelIniti
     private final Consumer<T> consumerLogic;
     private final Class<T> clazz;
     private final ExecutorService resultPipeline;
+    private final String charSet;
 
     /**
      * Replace BizHandler --> CrawlHandler
@@ -30,12 +31,13 @@ public class CrawlChannelInitializer<T extends WebSite> extends HttpChannelIniti
      * @param clazz WebSite class
      * @param resultPipeline executor service based result pipeline
      */
-    public CrawlChannelInitializer(boolean ssl, boolean compress, Consumer<ChannelHandlerContext> strategy,
+    public CrawlChannelInitializer(boolean ssl, boolean compress, String charSet,Consumer<ChannelHandlerContext> strategy,
                                    Consumer<T> consumerLogic, Class<T> clazz, ExecutorService resultPipeline){
         super(ssl, compress, null, strategy);
         this.consumerLogic = consumerLogic;
         this.clazz = clazz;
         this.resultPipeline = resultPipeline;
+        this.charSet = charSet;
     }
 
     /**
@@ -52,7 +54,7 @@ public class CrawlChannelInitializer<T extends WebSite> extends HttpChannelIniti
         if(compress){
             ch.pipeline().addLast("http-decompressor", new HttpContentDecompressor());
         }
-        ch.pipeline().addLast(new WebSiteConverter<T>(clazz))
+        ch.pipeline().addLast(new WebSiteConverter<T>(clazz, charSet))
                 .addLast(new CrawlHandler<T>(resultPipeline, consumerLogic))
                 .addLast(new ChannelInboundHandlerAdapter(){
                     @Override

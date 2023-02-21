@@ -18,7 +18,7 @@ public class CrawlEngineBuilder<T extends WebSite> {
 
     public CrawlEngine<T> build(){
         CrawlChannelInitializer<T> initializer = new CrawlChannelInitializer<T>(
-                engine.isSsl(), engine.isCompress(),
+                engine.isSsl(), engine.isCompress(), engine.getCharSet(),
                 engine.getExpConsumer(), engine.getResConsumer(), clazz, engine.getResultPipeline());
         engine.boot(initializer);
         return this.engine;
@@ -31,6 +31,11 @@ public class CrawlEngineBuilder<T extends WebSite> {
 
     public CrawlEngineBuilder<T> compress(boolean compress){
         engine.setCompress(compress);
+        return this;
+    }
+
+    public CrawlEngineBuilder<T> charSet(String charSet){
+        engine.setCharSet(charSet);
         return this;
     }
 
