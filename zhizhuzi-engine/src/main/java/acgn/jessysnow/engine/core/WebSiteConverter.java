@@ -27,7 +27,6 @@ public class WebSiteConverter<T extends WebSite> extends MessageToMessageDecoder
 
     @Override
     protected void decode(ChannelHandlerContext ctx, HttpContent msg, List<Object> out) throws Exception {
-//        String response = msg.content().toString(StandardCharsets.UTF_8);
         String response = msg.content().toString(Charset.forName(charSet));
 
         T res;
