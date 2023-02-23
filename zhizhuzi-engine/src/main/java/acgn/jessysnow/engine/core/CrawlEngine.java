@@ -90,6 +90,9 @@ public class CrawlEngine<T extends WebSite> implements Engine {
     protected void setCharSet(String charSet){
         this.charSet = charSet;
     }
+    protected void setTaskQueue(TaskQueue taskQueue){
+
+    }
 
 
     // Close engine
