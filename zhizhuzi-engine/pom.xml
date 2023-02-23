@@ -47,6 +47,11 @@
             <artifactId>zhizhuzi-gson</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>4.3.0</version>
+        </dependency>
     </dependencies>
 
 </project>
