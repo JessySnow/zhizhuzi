@@ -6,4 +6,6 @@ public interface TaskQueue{
     <T extends CrawlTask> void offer(T task);
 
     CrawlTask poll();
+
+    CrawlTask poll(int timeout);
 }

@@ -28,6 +28,7 @@ public class RedisTaskQueue implements TaskQueue {
         this.pool = new JedisPool(host, port);
     }
 
+    // offer a task to redis list
     @Override
     public <T extends CrawlTask> void offer(T task) {
         String keyPrefix = "task:" + clazz.toString();
@@ -37,11 +38,22 @@ public class RedisTaskQueue implements TaskQueue {
         }
     }
 
+    // blocking poll
     @Override
     public CrawlTask poll() {
         String keyPrefix = "task:" + clazz.toString();
         try(Jedis jedis = pool.getResource()){
             List<String> pair = jedis.brpop(keyPrefix);
+            return gson.fromJson(pair.get(1), CrawlTask.class);
+        }
+    }
+
+    // blocking poll with timeout
+    @Override
+    public CrawlTask poll(int timeout) {
+        String keyPrefix = "task:" + clazz.toString();
+        try(Jedis jedis = pool.getResource()){
+            List<String> pair = jedis.brpop(timeout, keyPrefix);
             return gson.fromJson(pair.get(1), CrawlTask.class);
         }
     }
