@@ -8,4 +8,6 @@ public interface TaskQueue{
     CrawlTask poll();
 
     CrawlTask poll(int timeout);
+
+    long size();
 }

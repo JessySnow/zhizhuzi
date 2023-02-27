@@ -15,23 +15,25 @@ public class RedisTaskQueue implements TaskQueue {
     private final Gson gson;
 
     private final Class<? extends WebSite> clazz;
+    private final String keyPrefix;
 
     public RedisTaskQueue(Class<? extends WebSite> clazz){
         this.clazz = clazz;
         this.gson = new Gson();
         this.pool = new JedisPool("localhost", 6379);
+        this.keyPrefix = "task:"+clazz.toString();
     }
 
     public RedisTaskQueue(Class<? extends WebSite> clazz, String host, int port){
         this.clazz = clazz;
         this.gson = new Gson();
         this.pool = new JedisPool(host, port);
+        this.keyPrefix = "task:"+clazz.toString();
     }
 
     // offer a task to redis list
     @Override
     public <T extends CrawlTask> void offer(T task) {
-        String keyPrefix = "task:" + clazz.toString();
         String keyValue = gson.toJson(task);
         try(Jedis jedis = pool.getResource()){
             jedis.lpush(keyPrefix, keyValue);
@@ -41,7 +43,6 @@ public class RedisTaskQueue implements TaskQueue {
     // blocking poll
     @Override
     public CrawlTask poll() {
-        String keyPrefix = "task:" + clazz.toString();
         try(Jedis jedis = pool.getResource()){
             List<String> pair = jedis.brpop(keyPrefix);
             return gson.fromJson(pair.get(1), CrawlTask.class);
@@ -51,10 +52,16 @@ public class RedisTaskQueue implements TaskQueue {
     // blocking poll with timeout
     @Override
     public CrawlTask poll(int timeout) {
-        String keyPrefix = "task:" + clazz.toString();
         try(Jedis jedis = pool.getResource()){
             List<String> pair = jedis.brpop(timeout, keyPrefix);
             return gson.fromJson(pair.get(1), CrawlTask.class);
+        }
+    }
+
+    @Override
+    public long size() {
+        try(Jedis jedis = pool.getResource()){
+            return jedis.llen(keyPrefix);
         }
     }
 }
