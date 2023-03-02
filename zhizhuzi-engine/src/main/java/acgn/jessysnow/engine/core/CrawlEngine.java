@@ -122,7 +122,6 @@ public class CrawlEngine<T extends WebSite> implements Engine {
                 });
     }
 
-    //FIXME Use ChannelPromise
     @Override
     public void blockExecute(CrawlTask task) {
         if (task == null || task.getHost() == null){
@@ -138,7 +137,8 @@ public class CrawlEngine<T extends WebSite> implements Engine {
             channelFuture.channel().writeAndFlush(request);
         });
 
-        // sync channel, current thread will be notified in CrawlHandler or Exception Handler
+        // While TCP connection is build, sync this channel(socket),
+        // until crawl handler's or exception handler's notification
         try {
             synchronized (future.channel()){
                 future.channel().wait();
