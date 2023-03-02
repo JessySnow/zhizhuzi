@@ -14,6 +14,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpRequest;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -23,16 +24,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-/**
- * Netty implement of Http client engine
- */
 @Log4j2
 public class CrawlEngine<T extends WebSite> implements Engine {
 
+    // Netty base config
     private final Bootstrap bootstrap = new Bootstrap();
     private EventLoopGroup workGroup;
+
     // Global Socket Option
     private final HashMap<ChannelOption<Boolean>, Boolean> optionSwitch = new HashMap<>();
+
     // HTTP options
     @Getter
     private boolean ssl;
@@ -40,6 +41,7 @@ public class CrawlEngine<T extends WebSite> implements Engine {
     private boolean compress;
     @Getter
     private String charSet = "UTF-8";
+
     // Executor service based pipeline
     @Getter
     private ExecutorService resultPipeline;
@@ -94,7 +96,6 @@ public class CrawlEngine<T extends WebSite> implements Engine {
     }
 
 
-    // Close engine
     @Override
     public void close(){
         this.workGroup.shutdownGracefully()
@@ -103,6 +104,7 @@ public class CrawlEngine<T extends WebSite> implements Engine {
 
     @Override
     public void boot(ChannelInitializer<SocketChannel> initializer) {
+        // Sys native channel config
         this.bootstrap.group(workGroup)
                 .channel(this.workGroup instanceof NioEventLoopGroup ? NioSocketChannel.class :
                         workGroup instanceof KQueueEventLoopGroup ? KQueueSocketChannel.class :
@@ -117,20 +119,9 @@ public class CrawlEngine<T extends WebSite> implements Engine {
             throw new IllegalStateException("ClientEngine already closed");
         }
 
-        // Flush back the request while tcp-connection is build
         bootstrap.connect(task.getHost(), task.getPort())
                 .addListener((ChannelFutureListener) channelFuture -> {
-                    DefaultFullHttpRequest request = new DefaultFullHttpRequest(task.getHttpVersion(), task.getMethod(),
-                            task.getUri().toASCIIString());
-                    // Host
-                    request.headers().set(HttpHeaderNames.HOST, task.getHost());
-                    // UA
-                    request.headers().set(HttpHeaderNames.USER_AGENT, task.getUserAgent());
-                    // Cookies
-                    if(task.getCookie() != null && !task.getCookie().isBlank()){
-                       request.headers().set(HttpHeaderNames.COOKIE, task.getCookie());
-                    }
-
+                    HttpRequest request = configHttpRequest(task);
                     channelFuture.channel().writeAndFlush(request);
                 });
     }
@@ -144,21 +135,10 @@ public class CrawlEngine<T extends WebSite> implements Engine {
 
         ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
         try {
-            future.sync(); // wait until tcp-connection is build
-            // exception handler's job
-        } catch (InterruptedException ignored) {}
+            future.sync();
+        } catch (InterruptedException e) {log.error(e);}
 
-        DefaultFullHttpRequest request = new DefaultFullHttpRequest(task.getHttpVersion(), task.getMethod(),
-                task.getUri().toASCIIString());
-
-        // Host
-        request.headers().set(HttpHeaderNames.HOST, task.getHost());
-        // UA
-        request.headers().set(HttpHeaderNames.USER_AGENT, task.getUserAgent());
-        // Cookies
-        if(task.getCookie() != null && !task.getCookie().isBlank()){
-            request.headers().set(HttpHeaderNames.COOKIE, task.getCookie());
-        }
+        HttpRequest request = configHttpRequest(task);
 
         // write and flush request to this channel
         future.channel().writeAndFlush(request);
@@ -169,6 +149,7 @@ public class CrawlEngine<T extends WebSite> implements Engine {
             }
         } catch (InterruptedException ignored) {}
     }
+
 
     private EventLoopGroup getWorkGroup(Integer poolSize){
         SysHelper.SysType sysType = SysHelper.getSysType();
@@ -183,5 +164,16 @@ public class CrawlEngine<T extends WebSite> implements Engine {
             res = new EpollEventLoopGroup(poolSize);
         }
         return res;
+    }
+
+    private HttpRequest configHttpRequest(CrawlTask task){
+        DefaultFullHttpRequest request = new DefaultFullHttpRequest(task.getHttpVersion(),
+                                            task.getMethod(), task.getUri().toASCIIString());
+        request.headers().set(HttpHeaderNames.HOST, task.get());
+        request.headers().set(HttpHeaderNames.USER_AGENT, task.getUserAgent());
+        if(task.getCookie() != null && !task.getCookie().isBlank()){
+            request.headers().set(HttpHeaderNames.COOKIE, task.getCookie());
+        }
+        return request;
     }
 }
