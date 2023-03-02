@@ -115,6 +115,10 @@ public class CrawlEngine<T extends WebSite> implements Engine {
 
     @Override
     public void execute(CrawlTask task) {
+        if (task == null || task.getHost() == null){
+            log.error(task);
+            throw new IllegalStateException("Crawl task is broken");
+        }
         if(this.bootstrap.config().group().isShutdown()){
             throw new IllegalStateException("ClientEngine already closed");
         }
@@ -129,20 +133,20 @@ public class CrawlEngine<T extends WebSite> implements Engine {
     //FIXME Use ChannelPromise
     @Override
     public void blockExecute(CrawlTask task) {
+        if (task == null || task.getHost() == null){
+            log.error(task);
+            throw new IllegalStateException("Crawl task is broken");
+        }
         if(this.bootstrap.config().group().isShutdown()){
             throw new IllegalStateException("ClientEngine already closed");
         }
 
         ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
-        try {
-            future.sync();
-        } catch (InterruptedException e) {log.error(e);}
+        future .addListener((ChannelFutureListener) channelFuture -> {
+            HttpRequest request = configHttpRequest(task);
+            channelFuture.channel().writeAndFlush(request);
+        });
 
-        HttpRequest request = configHttpRequest(task);
-
-        // write and flush request to this channel
-        future.channel().writeAndFlush(request);
-        // synchronize on this channel
         try {
             synchronized (future.channel()){
                 future.channel().wait();
