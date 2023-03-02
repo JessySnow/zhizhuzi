@@ -14,6 +14,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpRequest;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -23,24 +24,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-/**
- * Netty implement of Http client engine
- */
 @Log4j2
 public class CrawlEngine<T extends WebSite> implements Engine {
 
     private final Bootstrap bootstrap = new Bootstrap();
     private EventLoopGroup workGroup;
-    // Global Socket Option
     private final HashMap<ChannelOption<Boolean>, Boolean> optionSwitch = new HashMap<>();
-    // HTTP options
     @Getter
     private boolean ssl;
     @Getter
     private boolean compress;
     @Getter
     private String charSet = "UTF-8";
-    // Executor service based pipeline
     @Getter
     private ExecutorService resultPipeline;
     @Getter
@@ -120,16 +115,7 @@ public class CrawlEngine<T extends WebSite> implements Engine {
         // Flush back the request while tcp-connection is build
         bootstrap.connect(task.getHost(), task.getPort())
                 .addListener((ChannelFutureListener) channelFuture -> {
-                    DefaultFullHttpRequest request = new DefaultFullHttpRequest(task.getHttpVersion(), task.getMethod(),
-                            task.getUri().toASCIIString());
-                    // Host
-                    request.headers().set(HttpHeaderNames.HOST, task.getHost());
-                    // UA
-                    request.headers().set(HttpHeaderNames.USER_AGENT, task.getUserAgent());
-                    // Cookies
-                    if(task.getCookie() != null && !task.getCookie().isBlank()){
-                       request.headers().set(HttpHeaderNames.COOKIE, task.getCookie());
-                    }
+                    HttpRequest request = configRequest(task);
 
                     channelFuture.channel().writeAndFlush(request);
                 });
@@ -141,28 +127,13 @@ public class CrawlEngine<T extends WebSite> implements Engine {
         if(this.bootstrap.config().group().isShutdown()){
             throw new IllegalStateException("ClientEngine already closed");
         }
-
         ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
-        try {
-            future.sync(); // wait until tcp-connection is build
-            // exception handler's job
-        } catch (InterruptedException ignored) {}
+        future.addListener((ChannelFutureListener) channelFuture -> {
+            HttpRequest request = configRequest(task);
+            channelFuture.channel().writeAndFlush(request);
+        });
 
-        DefaultFullHttpRequest request = new DefaultFullHttpRequest(task.getHttpVersion(), task.getMethod(),
-                task.getUri().toASCIIString());
-
-        // Host
-        request.headers().set(HttpHeaderNames.HOST, task.getHost());
-        // UA
-        request.headers().set(HttpHeaderNames.USER_AGENT, task.getUserAgent());
-        // Cookies
-        if(task.getCookie() != null && !task.getCookie().isBlank()){
-            request.headers().set(HttpHeaderNames.COOKIE, task.getCookie());
-        }
-
-        // write and flush request to this channel
-        future.channel().writeAndFlush(request);
-        // synchronize on this channel
+        // sync channel, current thread will be notified in CrawlHandler or Exception Handler
         try {
             synchronized (future.channel()){
                 future.channel().wait();
@@ -183,5 +154,16 @@ public class CrawlEngine<T extends WebSite> implements Engine {
             res = new EpollEventLoopGroup(poolSize);
         }
         return res;
+    }
+
+    private HttpRequest configRequest(CrawlTask task){
+        DefaultFullHttpRequest request = new DefaultFullHttpRequest(task.getHttpVersion(), task.getMethod(),
+                task.getUri().toASCIIString());
+        request.headers().set(HttpHeaderNames.HOST, task.getHost());
+        request.headers().set(HttpHeaderNames.USER_AGENT, task.getUserAgent());
+        if(task.getCookie() != null && !task.getCookie().isBlank()){
+            request.headers().set(HttpHeaderNames.COOKIE, task.getCookie());
+        }
+        return request;
     }
 }
