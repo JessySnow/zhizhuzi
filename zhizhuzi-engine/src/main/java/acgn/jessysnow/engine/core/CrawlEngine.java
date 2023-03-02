@@ -5,6 +5,7 @@ import acgn.jessysnow.engine.pojo.CrawlTask;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
+import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.kqueue.KQueueEventLoopGroup;
 import io.netty.channel.kqueue.KQueueSocketChannel;
@@ -17,6 +18,7 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -170,18 +172,16 @@ public class CrawlEngine<T extends WebSite> implements Engine {
 
     private EventLoopGroup getWorkGroup(Integer poolSize){
         SysHelper.SysType sysType = SysHelper.getSysType();
-        poolSize = poolSize == null || poolSize == 0 ?
-                Runtime.getRuntime().availableProcessors() : poolSize;
+        poolSize = Optional.ofNullable(poolSize).orElse(Runtime.getRuntime().availableProcessors());
 
         EventLoopGroup res;
         if (sysType == null || sysType == SysHelper.SysType.Windows){
             res = new NioEventLoopGroup(poolSize);
         }else if (sysType == SysHelper.SysType.MAC_OS_X || sysType == SysHelper.SysType.FreeBSD){
             res = new KQueueEventLoopGroup(poolSize);
-        }else {
-            res = new NioEventLoopGroup(poolSize);
+        }else { // Linux
+            res = new EpollEventLoopGroup(poolSize);
         }
-
         return res;
     }
 }
