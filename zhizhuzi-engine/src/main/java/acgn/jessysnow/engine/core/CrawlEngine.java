@@ -14,6 +14,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
+import io.netty.util.AttributeKey;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -140,9 +141,14 @@ public class CrawlEngine<T extends WebSite> implements Engine {
         // While TCP connection is build, sync this channel(socket),
         // until crawl handler's or exception handler's notification
         try {
+            AttributeKey<Object> futureKey = AttributeKey.newInstance("futureKey");
+            future.channel().attr(futureKey);
             synchronized (future.channel()){
                 future.channel().wait();
             }
+
+            Object res = future.channel().attr(futureKey).get();
+            System.out.println(res);
         } catch (InterruptedException ignored) {}
     }
 
