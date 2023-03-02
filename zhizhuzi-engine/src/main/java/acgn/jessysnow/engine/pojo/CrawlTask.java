@@ -46,10 +46,9 @@ public class CrawlTask{
         return this;
     }
 
-    // FIXME unsupported yet
+    // TODO unsupported yet
     public CrawlTask post(){
-        this.method = HttpMethod.POST;
-        return this;
+        throw new UnsupportedOperationException();
     }
 
     public CrawlTask appendCookie(String cookie){

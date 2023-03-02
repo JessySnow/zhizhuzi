@@ -27,7 +27,6 @@ import java.util.function.Consumer;
 @Log4j2
 public class CrawlEngine<T extends WebSite> implements Engine {
 
-    // Netty base config
     private final Bootstrap bootstrap = new Bootstrap();
     private EventLoopGroup workGroup;
     private final HashMap<ChannelOption<Boolean>, Boolean> optionSwitch = new HashMap<>();
