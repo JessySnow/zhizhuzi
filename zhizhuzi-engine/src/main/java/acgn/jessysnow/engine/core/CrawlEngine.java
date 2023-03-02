@@ -30,19 +30,13 @@ public class CrawlEngine<T extends WebSite> implements Engine {
     // Netty base config
     private final Bootstrap bootstrap = new Bootstrap();
     private EventLoopGroup workGroup;
-
-    // Global Socket Option
     private final HashMap<ChannelOption<Boolean>, Boolean> optionSwitch = new HashMap<>();
-
-    // HTTP options
     @Getter
     private boolean ssl;
     @Getter
     private boolean compress;
     @Getter
     private String charSet = "UTF-8";
-
-    // Executor service based pipeline
     @Getter
     private ExecutorService resultPipeline;
     @Getter
@@ -125,7 +119,7 @@ public class CrawlEngine<T extends WebSite> implements Engine {
 
         bootstrap.connect(task.getHost(), task.getPort())
                 .addListener((ChannelFutureListener) channelFuture -> {
-                    HttpRequest request = configHttpRequest(task);
+                    HttpRequest request = configRequest(task);
                     channelFuture.channel().writeAndFlush(request);
                 });
     }
@@ -140,13 +134,13 @@ public class CrawlEngine<T extends WebSite> implements Engine {
         if(this.bootstrap.config().group().isShutdown()){
             throw new IllegalStateException("ClientEngine already closed");
         }
-
         ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
-        future .addListener((ChannelFutureListener) channelFuture -> {
-            HttpRequest request = configHttpRequest(task);
+        future.addListener((ChannelFutureListener) channelFuture -> {
+            HttpRequest request = configRequest(task);
             channelFuture.channel().writeAndFlush(request);
         });
 
+        // sync channel, current thread will be notified in CrawlHandler or Exception Handler
         try {
             synchronized (future.channel()){
                 future.channel().wait();
@@ -170,10 +164,10 @@ public class CrawlEngine<T extends WebSite> implements Engine {
         return res;
     }
 
-    private HttpRequest configHttpRequest(CrawlTask task){
-        DefaultFullHttpRequest request = new DefaultFullHttpRequest(task.getHttpVersion(),
-                                            task.getMethod(), task.getUri().toASCIIString());
-        request.headers().set(HttpHeaderNames.HOST, task.get());
+    private HttpRequest configRequest(CrawlTask task){
+        DefaultFullHttpRequest request = new DefaultFullHttpRequest(task.getHttpVersion(), task.getMethod(),
+                task.getUri().toASCIIString());
+        request.headers().set(HttpHeaderNames.HOST, task.getHost());
         request.headers().set(HttpHeaderNames.USER_AGENT, task.getUserAgent());
         if(task.getCookie() != null && !task.getCookie().isBlank()){
             request.headers().set(HttpHeaderNames.COOKIE, task.getCookie());
