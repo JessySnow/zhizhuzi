@@ -124,7 +124,7 @@ public class CrawlEngine<T extends WebSite> implements Engine {
     }
 
     @Override
-    public void blockExecute(CrawlTask task) {
+    public T blockExecute(CrawlTask task) {
         if (task == null || task.getHost() == null){
             log.error(task);
             throw new IllegalStateException("Crawl task is broken");
@@ -141,15 +141,14 @@ public class CrawlEngine<T extends WebSite> implements Engine {
         // While TCP connection is build, sync this channel(socket),
         // until crawl handler's or exception handler's notification
         try {
-            AttributeKey<Object> futureKey = AttributeKey.newInstance("futureKey");
-            future.channel().attr(futureKey);
+            future.channel().attr(AttributeKey.newInstance(""));
             synchronized (future.channel()){
                 future.channel().wait();
             }
-
-            Object res = future.channel().attr(futureKey).get();
-            System.out.println(res);
+            T res = (T) future.channel().attr(AttributeKey.valueOf("")).get();
+            return res;
         } catch (InterruptedException ignored) {}
+        return null;
     }
 
 

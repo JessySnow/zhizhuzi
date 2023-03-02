@@ -4,7 +4,6 @@ import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
 import java.util.concurrent.ExecutorService;
@@ -34,11 +33,9 @@ public class CrawlHandler<T extends WebSite> extends ChannelInboundHandlerAdapte
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        AttributeKey<Object> futureKey = AttributeKey.valueOf("futureKey");
-        Attribute<Object> attribute = ctx.channel().attr(futureKey);
         T website = (T) msg;
-        attribute.set(website);
 
+        ctx.channel().attr(AttributeKey.valueOf("")).set(website);
         resultPipeline.execute(() -> {
             consumeLogic.accept(website);
             synchronized (ctx.channel()){

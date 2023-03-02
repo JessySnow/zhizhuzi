@@ -11,5 +11,5 @@ public interface Engine extends AutoCloseable {
     void execute(CrawlTask task);
 
     // execute task in blocking manner
-    void blockExecute(CrawlTask task);
+    Object blockExecute(CrawlTask task);
 }

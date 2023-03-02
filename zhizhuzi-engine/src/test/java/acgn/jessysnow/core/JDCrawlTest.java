@@ -18,7 +18,14 @@ public class JDCrawlTest {
                             .resConsumer(WebsiteConsumer::toConsole)
                             .charSet("UTF-8")
                             .build()){
-            engine.blockExecute(new CrawlTask("https://search.jd.com/Search?keyword=GPW"));
-        }catch (Exception ignored){;}
+            JDUrlSkus jdUrlSkus1 = engine.blockExecute(new CrawlTask("https://search.jd.com/Search?keyword=GPW"));
+            JDUrlSkus jdUrlSkus2 = engine.blockExecute(new CrawlTask("https://search.jd.com/Search?keyword=GPW2"));
+            JDUrlSkus jdUrlSkus3 = engine.blockExecute(new CrawlTask("https://search.jd.com/Search?keyword=RTX3090"));
+            System.out.println(jdUrlSkus1);
+            System.out.println(jdUrlSkus2);
+            System.out.println(jdUrlSkus3);
+        }catch (Exception ignored){
+            ignored.printStackTrace();
+        }
     }
 }
