@@ -18,7 +18,7 @@ public class JDCrawlTest {
                             .resConsumer(WebsiteConsumer::toConsole)
                             .charSet("UTF-8")
                             .build()){
-            engine.blockExecute(new CrawlTask("https://search.jd.com/Search?keyword=GPW"));
+            engine.blockExecute(new CrawlTask("https://search.jd.com/Search?keyword=12400F"));
         }catch (Exception ignored){}
     }
 }
