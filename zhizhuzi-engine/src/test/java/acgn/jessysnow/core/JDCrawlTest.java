@@ -2,7 +2,7 @@ package acgn.jessysnow.core;
 
 import acgn.jessysnow.engine.core.CrawlEngine;
 import acgn.jessysnow.engine.core.CrawlEngineBuilder;
-import acgn.jessysnow.engine.pojo.CrawlTask;
+import acgn.jessysnow.engine.core.CrawlTask;
 import acgn.jessysnow.jsoup.helper.WebsiteConsumer;
 import acgn.jessysnow.jsoup.sample.JDUrlSkus;
 import org.junit.jupiter.api.Test;

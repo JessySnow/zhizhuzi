@@ -1,6 +1,6 @@
 package acgn.jessysnow.engine.core;
 
-import acgn.jessysnow.engine.http.CrawlChannelInitializer;
+import acgn.jessysnow.engine.initializer.CrawlChannelInitializer;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.channel.ChannelHandlerContext;
 

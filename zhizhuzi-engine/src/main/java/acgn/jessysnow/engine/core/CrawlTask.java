@@ -1,4 +1,4 @@
-package acgn.jessysnow.engine.pojo;
+package acgn.jessysnow.engine.core;
 
 import acgn.jessysnow.engine.helper.UAHelper;
 import io.netty.handler.codec.http.HttpMethod;

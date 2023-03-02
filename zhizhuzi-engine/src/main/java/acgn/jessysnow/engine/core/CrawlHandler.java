@@ -26,19 +26,16 @@ public class CrawlHandler<T extends WebSite> extends ChannelInboundHandlerAdapte
 
     /**
      * This handler is placed behind a message2message_encoder, so it will get a Website from pipeline
-     *      - Cause consumeLogic will be a time-consuming operation, submit it to a executor-service
+     *      - Cause consumeLogic will be a time-consuming operation, submit it to an executor-service
      * @param msg A Website-pojo
      */
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         T website = (T) msg;
-        resultPipeline.execute(new Runnable() {
-            @Override
-            public void run() {
-                consumeLogic.accept(website);
-                synchronized (ctx.channel()){
-                    ctx.channel().notifyAll();
-                }
+        resultPipeline.execute(() -> {
+            consumeLogic.accept(website);
+            synchronized (ctx.channel()){
+                ctx.channel().notifyAll();
             }
         });
     }

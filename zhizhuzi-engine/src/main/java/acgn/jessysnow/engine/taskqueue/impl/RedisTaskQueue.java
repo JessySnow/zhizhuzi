@@ -1,7 +1,7 @@
-package acgn.jessysnow.engine.taskqueue;
+package acgn.jessysnow.engine.taskqueue.impl;
 
-import acgn.jessysnow.engine.core.TaskQueue;
-import acgn.jessysnow.engine.pojo.CrawlTask;
+import acgn.jessysnow.engine.core.CrawlTask;
+import acgn.jessysnow.engine.taskqueue.TaskQueue;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import com.google.gson.Gson;
 import redis.clients.jedis.Jedis;

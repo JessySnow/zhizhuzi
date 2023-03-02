@@ -1,6 +1,5 @@
 package acgn.jessysnow.engine.core;
 
-import acgn.jessysnow.engine.pojo.CrawlTask;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 
