@@ -18,9 +18,33 @@ public class JDCrawlTest {
                             .resConsumer(WebsiteConsumer::toConsole)
                             .charSet("UTF-8")
                             .build()){
-            engine.blockExecute(new CrawlTask("https://search.jd.com/Search?keyword=GPW"));
-            JDUrlSkus submit = engine.submit(new CrawlTask("https://search.jd.com/Search?keyword=GPW"));
-            WebsiteConsumer.toConsole(submit);
+            Thread t1 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    JDUrlSkus submit = engine.submit(new CrawlTask("https://search.jd.com/Search?keyword=GPW"));
+                    WebsiteConsumer.toConsole(submit);
+                }
+            });
+
+            Thread t2 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    JDUrlSkus submit = engine.submit(new CrawlTask("https://search.jd.com/Search?keyword=GPW2"));
+                    WebsiteConsumer.toConsole(submit);
+                }
+            });
+
+            Thread t3 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    JDUrlSkus submit = engine.submit(new CrawlTask("https://search.jd.com/Search?keyword=RTX4090"));
+                    WebsiteConsumer.toConsole(submit);
+                }
+            });
+
+            t1.start();
+            t2.start();
+            t3.start();
         }catch (Exception ignored){;}
     }
 }

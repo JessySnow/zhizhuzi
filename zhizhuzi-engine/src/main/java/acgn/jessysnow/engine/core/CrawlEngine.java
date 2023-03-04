@@ -135,7 +135,7 @@ public class CrawlEngine<T extends WebSite> implements Engine {
 
     // FIXME a bad patch !!!
     @Override
-    public T submit(CrawlTask task) {
+    public CrawlInfo submit(CrawlTask task) {
         validateStatus(task);
         ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
         future.addListener((ChannelFutureListener) channelFuture ->
@@ -149,7 +149,7 @@ public class CrawlEngine<T extends WebSite> implements Engine {
                 future.channel().wait();
             }
         } catch (InterruptedException ignored) {}
-        T result = (T)map.get(future.channel().id()).getResult();
+        CrawlInfo result = map.get(future.channel().id());
         map.remove(future.channel().id());
         return result;
     }
