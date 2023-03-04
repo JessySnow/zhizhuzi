@@ -1,5 +1,6 @@
 package acgn.jessysnow.engine.core;
 
+import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 
@@ -12,4 +13,7 @@ public interface Engine extends AutoCloseable {
 
     // execute task in blocking manner
     void blockExecute(CrawlTask task);
+
+    // execute and get result as pojo
+    WebSite submit(CrawlTask task);
 }

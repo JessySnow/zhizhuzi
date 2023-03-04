@@ -1,4 +1,4 @@
-package acgn.jessysnow.engine.core.handler;
+package acgn.jessysnow.engine.core;
 
 import acgn.jessysnow.gson.pojo.Json;
 import acgn.jessysnow.jsoup.parser.DomParser;

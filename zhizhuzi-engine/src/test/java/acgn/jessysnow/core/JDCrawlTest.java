@@ -19,6 +19,8 @@ public class JDCrawlTest {
                             .charSet("UTF-8")
                             .build()){
             engine.blockExecute(new CrawlTask("https://search.jd.com/Search?keyword=GPW"));
+            JDUrlSkus submit = engine.submit(new CrawlTask("https://search.jd.com/Search?keyword=GPW"));
+            WebsiteConsumer.toConsole(submit);
         }catch (Exception ignored){;}
     }
 }

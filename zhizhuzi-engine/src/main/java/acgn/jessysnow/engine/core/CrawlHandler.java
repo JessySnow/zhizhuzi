@@ -1,4 +1,4 @@
-package acgn.jessysnow.engine.core.handler;
+package acgn.jessysnow.engine.core;
 
 import acgn.jessysnow.engine.core.CrawlEngine;
 import acgn.jessysnow.jsoup.pojo.WebSite;
@@ -34,6 +34,12 @@ public class CrawlHandler<T extends WebSite> extends ChannelInboundHandlerAdapte
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         T website = (T) msg;
+
+        // FIXME a bad patch !!!
+        if (CrawlEngine.map.containsKey(ctx.channel().id())){
+            CrawlEngine.map.get(ctx.channel().id()).setResult(website);
+        }
+
         resultPipeline.execute(() -> {
             consumeLogic.accept(website);
             synchronized (ctx.channel()){
