@@ -15,6 +15,8 @@ import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.AttributeKey;
+import io.netty.util.concurrent.DefaultPromise;
+import io.netty.util.concurrent.Promise;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -135,20 +137,17 @@ public class CrawlEngine<T extends WebSite> implements Engine {
         ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
         future.addListener((ChannelFutureListener) channelFuture -> {
             HttpRequest request = configRequest(task);
-            channelFuture.channel().writeAndFlush(request);
+//            TODO try sync this
+            ChannelPromise futurePromise = channelFuture.channel().newPromise();
+            channelFuture.channel().writeAndFlush(request, futurePromise);
         });
 
         // While TCP connection is build, sync this channel(socket),
         // until crawl handler's or exception handler's notification
         try {
-            AttributeKey<Object> futureKey = AttributeKey.newInstance("futureKey");
-            future.channel().attr(futureKey);
             synchronized (future.channel()){
                 future.channel().wait();
             }
-
-            Object res = future.channel().attr(futureKey).get();
-            System.out.println(res);
         } catch (InterruptedException ignored) {}
     }
 
