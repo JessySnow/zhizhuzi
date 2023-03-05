@@ -26,7 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 @Log4j2
-public class CrawlEngine<T extends WebSite> implements Engine {
+public class CrawlEngine<T extends WebSite> implements Engine<T> {
     // FIXME a bad patch !!!
     protected static final ConcurrentMap<ChannelId, CrawlInfo> map = new ConcurrentHashMap<>();
 
@@ -113,8 +113,7 @@ public class CrawlEngine<T extends WebSite> implements Engine {
     public void execute(CrawlTask task) {
         validateStatus(task);
         bootstrap.connect(task.getHost(), task.getPort())
-                .addListener((ChannelFutureListener) channelFuture ->
-                        channelFuture.channel().writeAndFlush(configRequest(task)));
+                .addListener((ChannelFutureListener) future -> future.channel().writeAndFlush(configRequest(task)));
     }
 
     @Override
@@ -135,12 +134,11 @@ public class CrawlEngine<T extends WebSite> implements Engine {
 
     // FIXME a bad patch !!!
     @Override
-    public CrawlInfo submit(CrawlTask task) {
+    public CrawlInfo<T> submit(CrawlTask task) {
         validateStatus(task);
         ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
-        future.addListener((ChannelFutureListener) channelFuture ->
-                channelFuture.channel().writeAndFlush(configRequest(task)));
-        map.put(future.channel().id(), new CrawlInfo(task));
+        future.addListener((ChannelFutureListener) _future -> _future.channel().writeAndFlush(configRequest(task)));
+        map.put(future.channel().id(), new CrawlInfo<T>(task));
 
         // While TCP connection is build, sync this channel(socket),
         // until crawl handler's or exception handler's notification
@@ -149,7 +147,7 @@ public class CrawlEngine<T extends WebSite> implements Engine {
                 future.channel().wait();
             }
         } catch (InterruptedException ignored) {}
-        CrawlInfo result = map.get(future.channel().id());
+        CrawlInfo<T> result = map.get(future.channel().id());
         map.remove(future.channel().id());
         return result;
     }
