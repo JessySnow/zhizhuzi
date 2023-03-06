@@ -7,11 +7,11 @@ public class CrawlInfo<T extends WebSite> {
     private final CrawlTask task;
     private T result;
 
-    protected CrawlTask getTask() {
+    public CrawlTask getTask() {
         return task;
     }
 
-    protected T getResult() {
+    public T getResult() {
         return result;
     }
 
