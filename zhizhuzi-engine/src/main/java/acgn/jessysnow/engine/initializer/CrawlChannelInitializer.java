@@ -1,4 +1,4 @@
-package acgn.jessysnow.engine.http;
+package acgn.jessysnow.engine.initializer;
 
 import acgn.jessysnow.engine.core.CrawlHandler;
 import acgn.jessysnow.engine.core.WebSiteConverter;

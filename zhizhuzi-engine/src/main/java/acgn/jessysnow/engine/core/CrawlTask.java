@@ -1,17 +1,16 @@
-package acgn.jessysnow.engine.pojo;
+package acgn.jessysnow.engine.core;
 
 import acgn.jessysnow.engine.helper.UAHelper;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
-/**
- * Crawl task pojo, describes the parameters of the download task
- */
 @Data
+@Log4j2
 public class CrawlTask{
     private String host;
     private int port;
@@ -23,17 +22,21 @@ public class CrawlTask{
     private String cookie;
     private String userAgent;
 
-    public CrawlTask(String uri) throws URISyntaxException {
-        this.uri = new URI(uri);
-        this.host = this.uri.getHost();
-        this.port = uri.startsWith("https") ? 443 : 80;
-        this.httpVersion = HttpVersion.HTTP_1_1;
-        this.method = HttpMethod.GET;
-        this.userAgent = UAHelper.getRandomUserAgent();
+    public CrawlTask(String uri) {
+        try {
+            this.uri = new URI(uri);
+            this.host = this.uri.getHost();
+            this.port = uri.startsWith("https") ? 443 : 80;
+            this.httpVersion = HttpVersion.HTTP_1_1;
+            this.method = HttpMethod.GET;
+            this.userAgent = UAHelper.getRandomUserAgent();
+        }catch (URISyntaxException e){
+            log.error(e);
+        }
     }
 
     // Default HTTP_1_1
-    public CrawlTask setHttpVersion(HttpVersion httpVersion){
+    public CrawlTask httpVersion(HttpVersion httpVersion){
         this.httpVersion = httpVersion;
         return this;
     }
@@ -43,9 +46,9 @@ public class CrawlTask{
         return this;
     }
 
+    // TODO unsupported yet
     public CrawlTask post(){
-        this.method = HttpMethod.POST;
-        return this;
+        throw new UnsupportedOperationException();
     }
 
     public CrawlTask appendCookie(String cookie){
