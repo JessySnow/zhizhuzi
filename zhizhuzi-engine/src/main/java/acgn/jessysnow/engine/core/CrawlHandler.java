@@ -1,10 +1,11 @@
 package acgn.jessysnow.engine.core;
 
-import acgn.jessysnow.engine.core.CrawlEngine;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
@@ -35,14 +36,13 @@ public class CrawlHandler<T extends WebSite> extends ChannelInboundHandlerAdapte
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         T website = (T) msg;
 
-        // FIXME a bad patch !!!
-        if (CrawlEngine.map.containsKey(ctx.channel().id())){
-            CrawlEngine.map.get(ctx.channel().id()).setResult(website);
-        }
-
         resultPipeline.execute(() -> {
             consumeLogic.accept(website);
             synchronized (ctx.channel()){
+                Attribute<CrawlInfo<T>> attr =
+                        ctx.channel().attr(AttributeKey.valueOf(ctx.channel().id().asShortText()));
+                CrawlInfo<T> info = attr.get();
+                info.setResult(website);
                 ctx.channel().notifyAll();
             }
         });

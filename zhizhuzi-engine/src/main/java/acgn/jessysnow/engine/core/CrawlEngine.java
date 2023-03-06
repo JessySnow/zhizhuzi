@@ -14,22 +14,19 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 @Log4j2
 public class CrawlEngine<T extends WebSite> implements Engine<T> {
-    // FIXME a bad patch !!!
-    protected static final ConcurrentMap<ChannelId, CrawlInfo> map = new ConcurrentHashMap<>();
-
     private final Bootstrap bootstrap = new Bootstrap();
     private EventLoopGroup workGroup;
     private final HashMap<ChannelOption<Boolean>, Boolean> optionSwitch = new HashMap<>();
@@ -132,13 +129,13 @@ public class CrawlEngine<T extends WebSite> implements Engine<T> {
         } catch (InterruptedException ignored) {}
     }
 
-    // FIXME a bad patch !!!
     @Override
     public CrawlInfo<T> submit(CrawlTask task) {
         validateStatus(task);
         ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
         future.addListener((ChannelFutureListener) _future -> _future.channel().writeAndFlush(configRequest(task)));
-        map.put(future.channel().id(), new CrawlInfo<T>(task));
+        Attribute<CrawlInfo<T>> info = future.channel().attr(AttributeKey.valueOf(future.channel().id().asShortText()));
+        info.set(new CrawlInfo<>(task));
 
         // While TCP connection is build, sync this channel(socket),
         // until crawl handler's or exception handler's notification
@@ -147,9 +144,8 @@ public class CrawlEngine<T extends WebSite> implements Engine<T> {
                 future.channel().wait();
             }
         } catch (InterruptedException ignored) {}
-        CrawlInfo<T> result = map.get(future.channel().id());
-        map.remove(future.channel().id());
-        return result;
+
+        return info.get();
     }
 
     private EventLoopGroup getWorkGroup(Integer poolSize){
