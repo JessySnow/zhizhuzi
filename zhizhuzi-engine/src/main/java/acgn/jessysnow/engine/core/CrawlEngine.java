@@ -14,18 +14,21 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
-import io.netty.util.AttributeKey;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 @Log4j2
-public class CrawlEngine<T extends WebSite> implements Engine {
+public class CrawlEngine<T extends WebSite> implements Engine<T> {
+    // FIXME a bad patch !!!
+    protected static final ConcurrentMap<ChannelId, CrawlInfo> map = new ConcurrentHashMap<>();
 
     private final Bootstrap bootstrap = new Bootstrap();
     private EventLoopGroup workGroup;
@@ -108,49 +111,46 @@ public class CrawlEngine<T extends WebSite> implements Engine {
 
     @Override
     public void execute(CrawlTask task) {
-        if (task == null || task.getHost() == null){
-            log.error(task);
-            throw new IllegalStateException("Crawl task is broken");
-        }
-        if(this.bootstrap.config().group().isShutdown()){
-            throw new IllegalStateException("ClientEngine already closed");
-        }
-
+        validateStatus(task);
         bootstrap.connect(task.getHost(), task.getPort())
-                .addListener((ChannelFutureListener) channelFuture -> {
-                    HttpRequest request = configRequest(task);
-                    channelFuture.channel().writeAndFlush(request);
-                });
+                .addListener((ChannelFutureListener) future -> future.channel().writeAndFlush(configRequest(task)));
     }
 
     @Override
-    public T blockExecute(CrawlTask task) {
-        if (task == null || task.getHost() == null){
-            log.error(task);
-            throw new IllegalStateException("Crawl task is broken");
-        }
-        if(this.bootstrap.config().group().isShutdown()){
-            throw new IllegalStateException("ClientEngine already closed");
-        }
+    public void blockExecute(CrawlTask task) {
+        validateStatus(task);
         ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
-        future.addListener((ChannelFutureListener) channelFuture -> {
-            HttpRequest request = configRequest(task);
-            channelFuture.channel().writeAndFlush(request);
-        });
+        future.addListener((ChannelFutureListener) channelFuture ->
+                channelFuture.channel().writeAndFlush(configRequest(task)));
 
         // While TCP connection is build, sync this channel(socket),
         // until crawl handler's or exception handler's notification
         try {
-            future.channel().attr(AttributeKey.newInstance(""));
             synchronized (future.channel()){
                 future.channel().wait();
             }
-            T res = (T) future.channel().attr(AttributeKey.valueOf("")).get();
-            return res;
         } catch (InterruptedException ignored) {}
-        return null;
     }
 
+    // FIXME a bad patch !!!
+    @Override
+    public CrawlInfo<T> submit(CrawlTask task) {
+        validateStatus(task);
+        ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
+        future.addListener((ChannelFutureListener) _future -> _future.channel().writeAndFlush(configRequest(task)));
+        map.put(future.channel().id(), new CrawlInfo<T>(task));
+
+        // While TCP connection is build, sync this channel(socket),
+        // until crawl handler's or exception handler's notification
+        try {
+            synchronized (future.channel()){
+                future.channel().wait();
+            }
+        } catch (InterruptedException ignored) {}
+        CrawlInfo<T> result = map.get(future.channel().id());
+        map.remove(future.channel().id());
+        return result;
+    }
 
     private EventLoopGroup getWorkGroup(Integer poolSize){
         SysHelper.SysType sysType = SysHelper.getSysType();
@@ -176,5 +176,15 @@ public class CrawlEngine<T extends WebSite> implements Engine {
             request.headers().set(HttpHeaderNames.COOKIE, task.getCookie());
         }
         return request;
+    }
+
+    private void validateStatus(CrawlTask task){
+        if (task == null || task.getHost() == null){
+            log.error(task);
+            throw new IllegalStateException("Crawl task is broken");
+        }
+        if(this.bootstrap.config().group().isShutdown()){
+            throw new IllegalStateException("ClientEngine already closed");
+        }
     }
 }
