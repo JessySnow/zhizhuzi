@@ -21,6 +21,7 @@ public class CrawlTask{
     private HttpMethod method;
     private String cookie;
     private String userAgent;
+    private Object extend;
 
     public CrawlTask(String uri) {
         try {
@@ -63,6 +64,11 @@ public class CrawlTask{
 
     public CrawlTask port(int port){
         this.port = port;
+        return this;
+    }
+
+    public CrawlTask attach(Object extend){
+        this.extend = extend;
         return this;
     }
 }
