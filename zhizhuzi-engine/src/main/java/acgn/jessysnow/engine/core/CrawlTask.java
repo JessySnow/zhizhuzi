@@ -4,6 +4,7 @@ import acgn.jessysnow.engine.helper.UAHelper;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import lombok.Data;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import java.net.URI;
@@ -21,6 +22,7 @@ public class CrawlTask{
     private HttpMethod method;
     private String cookie;
     private String userAgent;
+    @Getter
     private Object extend;
 
     public CrawlTask(String uri) {
