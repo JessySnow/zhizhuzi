@@ -109,8 +109,10 @@ public class CrawlEngine<T extends WebSite> implements Engine<T> {
     @Override
     public void execute(CrawlTask task) {
         validateStatus(task);
-        bootstrap.connect(task.getHost(), task.getPort())
-                .addListener((ChannelFutureListener) future -> future.channel().writeAndFlush(configRequest(task)));
+        ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort())
+                .addListener((ChannelFutureListener) _future -> _future.channel().writeAndFlush(configRequest(task)));
+        Attribute<CrawlInfo<T>> info = future.channel().attr(AttributeKey.valueOf(future.channel().id().asShortText()));
+        info.set(new CrawlInfo<>(task));
     }
 
     @Override
@@ -119,6 +121,8 @@ public class CrawlEngine<T extends WebSite> implements Engine<T> {
         ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
         future.addListener((ChannelFutureListener) channelFuture ->
                 channelFuture.channel().writeAndFlush(configRequest(task)));
+        Attribute<CrawlInfo<T>> info = future.channel().attr(AttributeKey.valueOf(future.channel().id().asShortText()));
+        info.set(new CrawlInfo<>(task));
 
         // While TCP connection is build, sync this channel(socket),
         // until crawl handler's or exception handler's notification
