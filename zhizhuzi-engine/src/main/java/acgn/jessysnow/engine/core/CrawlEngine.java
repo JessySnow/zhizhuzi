@@ -1,6 +1,7 @@
 package acgn.jessysnow.engine.core;
 
-import acgn.jessysnow.engine.helper.SysHelper;
+import acgn.jessysnow.common.pojo.CrawlTask;
+import acgn.jessysnow.common.helper.SysHelper;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;

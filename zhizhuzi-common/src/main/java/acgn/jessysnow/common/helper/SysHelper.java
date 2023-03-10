@@ -1,4 +1,4 @@
-package acgn.jessysnow.engine.helper;
+package acgn.jessysnow.common.helper;
 
 public class SysHelper {
     public static SysType getSysType(){

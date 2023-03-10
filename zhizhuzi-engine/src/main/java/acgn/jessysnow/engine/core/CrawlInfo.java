@@ -1,5 +1,6 @@
 package acgn.jessysnow.engine.core;
 
+import acgn.jessysnow.common.pojo.CrawlTask;
 import acgn.jessysnow.jsoup.pojo.WebSite;
 
 // embed crawl task and website(result)

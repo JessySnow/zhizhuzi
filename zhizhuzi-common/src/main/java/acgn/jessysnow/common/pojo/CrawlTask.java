@@ -1,6 +1,6 @@
-package acgn.jessysnow.engine.core;
+package acgn.jessysnow.common.pojo;
 
-import acgn.jessysnow.engine.helper.UAHelper;
+import acgn.jessysnow.common.helper.UAHelper;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import lombok.Data;

@@ -1,6 +1,6 @@
 package acgn.jessysnow.engine.taskqueue;
 
-import acgn.jessysnow.engine.core.CrawlTask;
+import acgn.jessysnow.common.pojo.CrawlTask;
 
 public interface TaskQueue{
     <T extends CrawlTask> void offer(T task);
