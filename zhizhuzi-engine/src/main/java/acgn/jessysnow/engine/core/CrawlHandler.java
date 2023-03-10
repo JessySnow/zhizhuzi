@@ -39,10 +39,6 @@ public class CrawlHandler<T extends WebSite> extends ChannelInboundHandlerAdapte
         resultPipeline.execute(() -> {
             consumeLogic.accept(website);
             synchronized (ctx.channel()){
-                Attribute<CrawlInfo<T>> attr =
-                        ctx.channel().attr(AttributeKey.valueOf(ctx.channel().id().asShortText()));
-                CrawlInfo<T> info = attr.get();
-                info.setResult(website);
                 ctx.channel().notifyAll();
             }
         });

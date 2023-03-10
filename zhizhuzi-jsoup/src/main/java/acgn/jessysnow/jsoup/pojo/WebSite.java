@@ -1,5 +1,6 @@
 package acgn.jessysnow.jsoup.pojo;
 
+import acgn.jessysnow.common.pojo.CrawlTask;
 import acgn.jessysnow.jsoup.sample.SimpleHtml;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,9 +15,7 @@ import lombok.Setter;
  *      List<String>
  */
 public abstract class WebSite {
-    // extend field
-    // FIXME
     @Getter
     @Setter
-    private Object extend;
+    private CrawlTask task;
 }

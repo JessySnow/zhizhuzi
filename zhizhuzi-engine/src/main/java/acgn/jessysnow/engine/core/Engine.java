@@ -16,5 +16,5 @@ public interface Engine<T extends WebSite> extends AutoCloseable {
     void blockExecute(CrawlTask task);
 
     // execute and get result as pojo
-    CrawlInfo<T> submit(CrawlTask task);
+    T submit(CrawlTask task);
 }

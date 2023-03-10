@@ -2,7 +2,6 @@ package acgn.jessysnow.core;
 
 import acgn.jessysnow.engine.core.CrawlEngine;
 import acgn.jessysnow.engine.core.CrawlEngineBuilder;
-import acgn.jessysnow.engine.core.CrawlInfo;
 import acgn.jessysnow.common.pojo.CrawlTask;
 import acgn.jessysnow.jsoup.helper.WebsiteConsumer;
 import acgn.jessysnow.jsoup.sample.JDUrlSkus;
@@ -40,8 +39,8 @@ public class JDCrawlTest {
                             .charSet("UTF-8")
                             .build()){
 
-            CrawlInfo<JDUrlSkus> res1 = engine.submit(new CrawlTask("https://search.jd.com/Search?keyword=G304"));
-            CrawlInfo<JDUrlSkus> res2 = engine.submit(new CrawlTask("https://search.jd.com/Search?keyword=GPW2"));
+            JDUrlSkus res1 = engine.submit(new CrawlTask("https://search.jd.com/Search?keyword=G304"));
+            JDUrlSkus res2 = engine.submit(new CrawlTask("https://search.jd.com/Search?keyword=GPW2"));
         }
     }
 }

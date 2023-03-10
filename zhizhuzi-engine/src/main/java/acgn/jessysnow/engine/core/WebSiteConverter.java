@@ -1,5 +1,6 @@
 package acgn.jessysnow.engine.core;
 
+import acgn.jessysnow.common.pojo.CrawlTask;
 import acgn.jessysnow.gson.pojo.Json;
 import acgn.jessysnow.jsoup.parser.DomParser;
 import acgn.jessysnow.jsoup.pojo.WebSite;
@@ -14,7 +15,6 @@ import org.jsoup.nodes.Document;
 
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Encode HttpContent to a website-pojo
@@ -42,12 +42,9 @@ public class WebSiteConverter<T extends WebSite> extends MessageToMessageDecoder
             res = parser.parse(document, clazz.getConstructor().newInstance());
         }
 
-        // FIXME
-        Attribute<CrawlInfo<T>> attr =
-                ctx.channel().attr(AttributeKey.valueOf(ctx.channel().id().asShortText()));
-        CrawlInfo<T> info = attr.get();
-        res = Optional.ofNullable(res).orElse(clazz.getConstructor().newInstance());
-        res.setExtend(info.getTask());
+        Attribute<Object> attr = ctx.channel().attr(AttributeKey.valueOf(ctx.channel().id().asShortText()));
+        res.setTask((CrawlTask) attr.get());
+        attr.set(res);
         out.add(res);
     }
 }
