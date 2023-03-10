@@ -110,8 +110,9 @@ public class CrawlEngine<T extends WebSite> implements Engine<T> {
     @Override
     public void execute(CrawlTask task) {
         validateStatus(task);
-        bootstrap.connect(task.getHost(), task.getPort())
+        ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort())
                 .addListener((ChannelFutureListener) _future -> _future.channel().writeAndFlush(configRequest(task)));
+        attachTask(future.channel(), task);
     }
 
     @Override
@@ -120,7 +121,7 @@ public class CrawlEngine<T extends WebSite> implements Engine<T> {
         ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
         future.addListener((ChannelFutureListener) channelFuture ->
                 channelFuture.channel().writeAndFlush(configRequest(task)));
-        future.channel().attr(AttributeKey.valueOf(future.channel().id().asShortText()));
+        attachTask(future.channel(), task);
         // While TCP connection is build, sync this channel(socket),
         // until crawl handler's or exception handler's notification
         try {
@@ -135,8 +136,7 @@ public class CrawlEngine<T extends WebSite> implements Engine<T> {
         validateStatus(task);
         ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
         future.addListener((ChannelFutureListener) _future -> _future.channel().writeAndFlush(configRequest(task)));
-        Attribute<Object> attr = future.channel().attr(AttributeKey.valueOf(future.channel().id().asShortText()));
-        attr.set(task);
+        Attribute<Object> attribute = attachTask(future.channel(), task);
 
         // While TCP connection is build, sync this channel(socket),
         // until crawl handler's or exception handler's notification
@@ -146,7 +146,7 @@ public class CrawlEngine<T extends WebSite> implements Engine<T> {
             }
         } catch (InterruptedException ignored) {}
 
-        return (T) attr.get();
+        return (T) attribute.get();
     }
 
     private EventLoopGroup getWorkGroup(Integer poolSize){
@@ -183,5 +183,11 @@ public class CrawlEngine<T extends WebSite> implements Engine<T> {
         if(this.bootstrap.config().group().isShutdown()){
             throw new IllegalStateException("ClientEngine already closed");
         }
+    }
+
+    private Attribute<Object> attachTask(Channel channel, CrawlTask task){
+        Attribute<Object> attr = channel.attr(AttributeKey.valueOf(channel.id().asShortText()));
+        attr.set(task);
+        return attr;
     }
 }
