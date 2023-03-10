@@ -31,7 +31,7 @@ public class JDCrawlTest {
     }
 
     @Test
-    public void test_attr_key() throws InterruptedException {
+    public void test_attr_key() {
         try(CrawlEngine<JDUrlSkus> engine =
                     new CrawlEngineBuilder<>(JDUrlSkus.class)
                             .ssl(true)
@@ -42,7 +42,6 @@ public class JDCrawlTest {
 
             CrawlInfo<JDUrlSkus> res1 = engine.submit(new CrawlTask("https://search.jd.com/Search?keyword=G304"));
             CrawlInfo<JDUrlSkus> res2 = engine.submit(new CrawlTask("https://search.jd.com/Search?keyword=GPW2"));
-            Thread.currentThread().join();
         }
     }
 }

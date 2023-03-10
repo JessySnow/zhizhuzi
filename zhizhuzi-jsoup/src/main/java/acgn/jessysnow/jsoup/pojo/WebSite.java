@@ -1,6 +1,8 @@
 package acgn.jessysnow.jsoup.pojo;
 
 import acgn.jessysnow.jsoup.sample.SimpleHtml;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Tag pojo of html document
@@ -11,4 +13,10 @@ import acgn.jessysnow.jsoup.sample.SimpleHtml;
  *      String
  *      List<String>
  */
-public abstract class WebSite {}
+public abstract class WebSite {
+    // extend field
+    // FIXME
+    @Getter
+    @Setter
+    private Object extend;
+}
