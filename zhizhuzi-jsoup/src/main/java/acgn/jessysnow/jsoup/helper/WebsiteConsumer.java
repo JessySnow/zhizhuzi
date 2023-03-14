@@ -52,13 +52,14 @@ public class WebsiteConsumer {
 
         if (result.getClass().equals(String.class)){
             String fieldName = field.getName();
-            System.out.printf("%s : %s", fieldName, result);
+            System.out.printf("%s : %s\n", fieldName, result);
         }else if (result instanceof List<?> list){
             System.out.println(field.getName());
             if (list.size() > 0 && !list.get(0).getClass().equals(String.class)){
                 log.error("{} field's type unsupported", field.getName());
             }
             list.forEach(item -> System.out.printf("%s ", item));
+            System.out.println();
         }
     }
 }
