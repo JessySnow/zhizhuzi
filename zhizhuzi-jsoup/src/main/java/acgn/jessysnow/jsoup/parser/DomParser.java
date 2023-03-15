@@ -1,5 +1,6 @@
 package acgn.jessysnow.jsoup.parser;
 
+import acgn.jessysnow.common.core.interfaces.Parser;
 import acgn.jessysnow.common.exception.UnsupportedTypeException;
 import acgn.jessysnow.common.core.annotation.Node;
 import acgn.jessysnow.common.core.annotation.Nodes;
@@ -26,16 +27,20 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Thread safe util class
  */
 @Log4j2
-public class DomParser<T extends WebSite> implements Parser<T>{
+public class DomParser<T extends WebSite> implements Parser<T> {
 
     /**
      * Parse site according to annotation on the field of site
-     * @param html Jsoup document object
+     * @param obj Jsoup document object
      * @param site An empty pojo of website, will be updated in place
      * @return site
      */
     @Override
-    public T parse(Document html, T site) {
+    public T parse(Object obj, T site) {
+        if (! (obj instanceof Document html)){
+            throw new IllegalArgumentException("Param obj need to be a Jsoup document");
+        }
+
         Field[] fields = site.getClass().getDeclaredFields();
         for(Field f : fields){
             Class<?> type = f.getType();
