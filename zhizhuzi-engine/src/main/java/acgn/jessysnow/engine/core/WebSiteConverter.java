@@ -1,9 +1,9 @@
 package acgn.jessysnow.engine.core;
 
-import acgn.jessysnow.common.pojo.CrawlTask;
+import acgn.jessysnow.common.core.pojo.CrawlTask;
 import acgn.jessysnow.gson.pojo.Json;
 import acgn.jessysnow.jsoup.parser.DomParser;
-import acgn.jessysnow.jsoup.pojo.WebSite;
+import acgn.jessysnow.common.core.pojo.WebSite;
 import com.google.gson.Gson;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;

@@ -1,13 +1,13 @@
-package acgn.jessysnow.jsoup.annotation;
+package acgn.jessysnow.common.core.annotation;
 
-import acgn.jessysnow.jsoup.enums.NodeTagName;
+import acgn.jessysnow.common.core.enums.NodeTagName;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static acgn.jessysnow.jsoup.enums.NodeTagName.*;
+import static acgn.jessysnow.common.core.enums.NodeTagName.*;
 /**
  * Dom Node def
  *     Supported approach to traverse html document

@@ -1,6 +1,6 @@
 package acgn.jessysnow.jsoup.parser;
 
-import acgn.jessysnow.jsoup.pojo.WebSite;
+import acgn.jessysnow.common.core.pojo.WebSite;
 import org.jsoup.nodes.Document;
 
 /**

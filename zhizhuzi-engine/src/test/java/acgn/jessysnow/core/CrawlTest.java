@@ -1,6 +1,6 @@
 package acgn.jessysnow.core;
 
-import acgn.jessysnow.common.pojo.CrawlTask;
+import acgn.jessysnow.common.core.pojo.CrawlTask;
 import acgn.jessysnow.engine.core.CrawlEngine;
 import acgn.jessysnow.engine.core.CrawlEngineBuilder;
 import acgn.jessysnow.jsoup.sample.JDUrlSkus;

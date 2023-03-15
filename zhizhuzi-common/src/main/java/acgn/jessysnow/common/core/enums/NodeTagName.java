@@ -1,4 +1,4 @@
-package acgn.jessysnow.jsoup.enums;
+package acgn.jessysnow.common.core.enums;
 
 /**
  * PreDefined DOM Node tag name

@@ -1,9 +1,9 @@
 package acgn.jessynow.skuprice.pojo;
 
-import acgn.jessysnow.jsoup.annotation.Node;
-import acgn.jessysnow.jsoup.annotation.Nodes;
-import acgn.jessysnow.jsoup.enums.NodeTagName;
-import acgn.jessysnow.jsoup.pojo.WebSite;
+import acgn.jessysnow.common.core.annotation.Node;
+import acgn.jessysnow.common.core.annotation.Nodes;
+import acgn.jessysnow.common.core.enums.NodeTagName;
+import acgn.jessysnow.common.core.pojo.WebSite;
 import lombok.Getter;
 
 import java.util.List;
