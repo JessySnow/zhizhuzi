@@ -1,7 +1,7 @@
 package acgn.jessysnow.jsoup.helper;
 
-import acgn.jessysnow.jsoup.annotation.Nodes;
-import acgn.jessysnow.jsoup.pojo.WebSite;
+import acgn.jessysnow.common.core.annotation.Nodes;
+import acgn.jessysnow.common.core.pojo.WebSite;
 import lombok.extern.log4j.Log4j2;
 
 import java.lang.annotation.Annotation;

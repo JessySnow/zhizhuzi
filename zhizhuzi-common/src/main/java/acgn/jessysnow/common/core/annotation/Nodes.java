@@ -1,4 +1,4 @@
-package acgn.jessysnow.jsoup.annotation;
+package acgn.jessysnow.common.core.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

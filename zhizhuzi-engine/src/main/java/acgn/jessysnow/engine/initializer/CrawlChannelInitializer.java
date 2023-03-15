@@ -3,7 +3,7 @@ package acgn.jessysnow.engine.initializer;
 import acgn.jessysnow.engine.core.CrawlHandler;
 import acgn.jessysnow.engine.core.WebSiteConverter;
 import acgn.jessysnow.engine.helper.SslHelper;
-import acgn.jessysnow.jsoup.pojo.WebSite;
+import acgn.jessysnow.common.core.pojo.WebSite;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
