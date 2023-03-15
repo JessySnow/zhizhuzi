@@ -8,7 +8,6 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
-// TODO Simplify
 @Log4j2
 public class JsonConsumer extends WebsiteConsumer {
     public static void toConsole(Json json){
@@ -19,6 +18,7 @@ public class JsonConsumer extends WebsiteConsumer {
 
         Field[] fields = json.getClass().getDeclaredFields();
         for (Field field : fields){
+            field.setAccessible(true);
             Object result = null;
             try {
                 result = field.get(json);
