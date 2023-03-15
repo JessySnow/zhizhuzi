@@ -34,7 +34,7 @@ public class JsonConsumer extends WebsiteConsumer {
         }
 
         if ((result instanceof List<?>) || (result instanceof Object[])){
-            System.out.printf("%s(%s):\n", field.getName(), field.getClass());
+            System.out.printf("%s(%s):\n", field.getName(), result.getClass());
             recursivePrint(result, 0);
         }else {
             System.out.printf("%s(%s) : %s\n", field.getName(), result.getClass(), result);
