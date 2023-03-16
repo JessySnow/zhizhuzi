@@ -24,7 +24,7 @@ public class CrawlEngineBuilder<T extends WebSite> {
                 engine.expConsumer, engine.resConsumer, clazz, engine.resultPipeline);
         engine.boot(initializer);
         return (Engine<T>) Proxy.newProxyInstance(CrawlEngine.class.getClassLoader(), new Class[]{Engine.class},
-                new EngineProxyHandler<>(this.engine, this.engine.getBrowserType()));
+                new EngineProxyHandler<>(this.engine, clazz, this.engine.getBrowserType()));
     }
 
     public CrawlEngineBuilder<T> ssl(boolean ssl){

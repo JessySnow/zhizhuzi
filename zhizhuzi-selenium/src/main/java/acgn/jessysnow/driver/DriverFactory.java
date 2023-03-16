@@ -14,7 +14,8 @@ import org.openqa.selenium.safari.SafariDriver;
 public class DriverFactory {
     DriverFactory(){}
 
-    public WebDriver buildDriver(Browsers type){
+    //TODO Use polling resources
+    public static WebDriver buildDriver(Browsers type){
         WebDriver driver;
         switch (type){
             case Edge -> driver = new EdgeDriver();
@@ -24,5 +25,10 @@ public class DriverFactory {
             default -> driver = null;
         }
         return driver;
+    }
+
+    // FIXME
+    public static void releaseDriver(WebDriver driver){
+        driver.close();
     }
 }
