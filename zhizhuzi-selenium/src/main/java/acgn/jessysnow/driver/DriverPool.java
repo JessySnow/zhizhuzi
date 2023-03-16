@@ -3,6 +3,7 @@ package acgn.jessysnow.driver;
 import acgn.jessysnow.enums.Browsers;
 
 /**
+ * TODO Pooling support
  * WebSelenium Driver pool
  */
 public class DriverPool{
