@@ -37,12 +37,9 @@ public class CrawlEngine<T extends WebSite> implements Engine<T> {
     private boolean compress;
     @Getter
     private String charSet = "UTF-8";
-    @Getter
-    private ExecutorService resultPipeline;
-    @Getter
-    private Consumer<T> resConsumer;
-    @Getter
-    private Consumer<ChannelHandlerContext> expConsumer;
+    protected ExecutorService resultPipeline;
+    protected Consumer<T> resConsumer;
+    protected Consumer<ChannelHandlerContext> expConsumer;
 
     /**
      * @see CrawlEngineBuilder

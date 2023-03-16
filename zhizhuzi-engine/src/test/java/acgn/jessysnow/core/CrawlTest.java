@@ -1,8 +1,8 @@
 package acgn.jessysnow.core;
 
 import acgn.jessysnow.common.core.pojo.CrawlTask;
-import acgn.jessysnow.engine.core.CrawlEngine;
 import acgn.jessysnow.engine.core.CrawlEngineBuilder;
+import acgn.jessysnow.engine.core.Engine;
 import acgn.jessysnow.jsoup.helper.WebsiteConsumer;
 import acgn.jessysnow.jsoup.sample.JDUrlSkus;
 import org.junit.jupiter.api.Assertions;
@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 
 public class CrawlTest {
     @Test
-    public void executeTest() throws InterruptedException {
-        try(CrawlEngine<JDUrlSkus> engine =
+    public void executeTest() throws Exception {
+        try(Engine<JDUrlSkus> engine =
                     new CrawlEngineBuilder<>(JDUrlSkus.class)
                             .ssl(true)
                             .compress(true)
@@ -32,8 +32,8 @@ public class CrawlTest {
     }
 
     @Test
-    public void blockTest(){
-        try(CrawlEngine<JDUrlSkus> engine =
+    public void blockTest() throws Exception {
+        try(Engine<JDUrlSkus> engine =
                     new CrawlEngineBuilder<>(JDUrlSkus.class)
                             .ssl(true)
                             .compress(true)
@@ -53,8 +53,8 @@ public class CrawlTest {
     }
 
     @Test
-    public void submitTest(){
-        try(CrawlEngine<JDUrlSkus> engine =
+    public void submitTest() throws Exception {
+        try(Engine<JDUrlSkus> engine =
                     new CrawlEngineBuilder<>(JDUrlSkus.class)
                             .ssl(true)
                             .compress(true)

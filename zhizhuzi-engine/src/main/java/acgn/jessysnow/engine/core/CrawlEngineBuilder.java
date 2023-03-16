@@ -4,6 +4,7 @@ import acgn.jessysnow.engine.initializer.CrawlChannelInitializer;
 import acgn.jessysnow.common.core.pojo.WebSite;
 import io.netty.channel.ChannelHandlerContext;
 
+import java.lang.reflect.Proxy;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
@@ -16,12 +17,13 @@ public class CrawlEngineBuilder<T extends WebSite> {
         this.clazz = clazz;
     }
 
-    public CrawlEngine<T> build(){
-        CrawlChannelInitializer<T> initializer = new CrawlChannelInitializer<T>(
+    public Engine<T> build(){
+        CrawlChannelInitializer<T> initializer = new CrawlChannelInitializer<>(
                 engine.isSsl(), engine.isCompress(), engine.getCharSet(),
-                engine.getExpConsumer(), engine.getResConsumer(), clazz, engine.getResultPipeline());
+                engine.expConsumer, engine.resConsumer, clazz, engine.resultPipeline);
         engine.boot(initializer);
-        return this.engine;
+        return (Engine<T>) Proxy.newProxyInstance(CrawlEngine.class.getClassLoader(), new Class[]{Engine.class},
+                new EngineProxyHandler<>(this.engine));
     }
 
     public CrawlEngineBuilder<T> ssl(boolean ssl){
