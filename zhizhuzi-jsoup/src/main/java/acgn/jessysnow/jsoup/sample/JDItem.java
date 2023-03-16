@@ -10,7 +10,7 @@ public class JDItem extends WebSite {
     @Nodes(domNodes = {
             @Node(nodeTagName = NodeTagName.body),
             @Node(nodeClassName = "w", order = 3),
-            @Node(nodeClassName = "product-intro clearfix"),
+            @Node(nodeClassName = "product-intro"),
             @Node(nodeClassName = "itemInfo-wrap"),
             @Node(nodeClassName = "sku-name"),
             @Node(nodeTagName = NodeTagName._text)
@@ -21,11 +21,11 @@ public class JDItem extends WebSite {
     @Nodes(domNodes = {
             @Node(nodeTagName = NodeTagName.body),
             @Node(nodeClassName = "w", order = 3),
-            @Node(nodeClassName = "product-intro clearfix"),
+            @Node(nodeClassName = "product-intro"),
             @Node(nodeClassName = "itemInfo-wrap"),
-            @Node(nodeClassName = "summary summary-first"),
+            @Node(nodeClassName = "summary-first"),
             @Node(nodeClassName = "summary-price-wrap"),
-            @Node(nodeClassName = "summary-price J-summary-price"),
+            @Node(nodeClassName = "summary-price"),
             @Node(nodeClassName = "dd"),
             @Node(nodeClassName = "p-price"),
             @Node(nodeClassName = "price"),
