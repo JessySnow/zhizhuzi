@@ -2,6 +2,7 @@ package acgn.jessysnow.parser;
 
 import acgn.jessysnow.jsoup.sample.JDItem;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -18,6 +19,8 @@ public class DDomParserTest {
         WebElement html = driver.findElements(By.tagName("html")).get(0);
         JDItem item = new JDItem();
         parser.parse(html, item);
+        Assert.assertNotNull(item.getName());
+        Assert.assertNotNull(item.getPrice());
     }
 
 
