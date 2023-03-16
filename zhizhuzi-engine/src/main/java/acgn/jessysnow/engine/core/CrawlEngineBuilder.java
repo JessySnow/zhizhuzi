@@ -2,6 +2,7 @@ package acgn.jessysnow.engine.core;
 
 import acgn.jessysnow.engine.initializer.CrawlChannelInitializer;
 import acgn.jessysnow.common.core.pojo.WebSite;
+import acgn.jessysnow.enums.Browsers;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.lang.reflect.Proxy;
@@ -23,7 +24,7 @@ public class CrawlEngineBuilder<T extends WebSite> {
                 engine.expConsumer, engine.resConsumer, clazz, engine.resultPipeline);
         engine.boot(initializer);
         return (Engine<T>) Proxy.newProxyInstance(CrawlEngine.class.getClassLoader(), new Class[]{Engine.class},
-                new EngineProxyHandler<>(this.engine));
+                new EngineProxyHandler<>(this.engine, this.engine.getBrowserType()));
     }
 
     public CrawlEngineBuilder<T> ssl(boolean ssl){
@@ -69,6 +70,11 @@ public class CrawlEngineBuilder<T extends WebSite> {
 
     public CrawlEngineBuilder<T> resConsumer(Consumer<T> resConsumer){
         this.engine.setResConsumer(resConsumer);
+        return this;
+    }
+
+    public CrawlEngineBuilder<T> browserType(Browsers type){
+        this.engine.setBrowserType(type);
         return this;
     }
 }
