@@ -45,7 +45,7 @@ public class CrawlChannelInitializer<T extends WebSite> extends HttpChannelIniti
      *          --> CrawlHandler --> ExceptionHandler
      */
     @Override
-    protected void initChannel(SocketChannel ch) throws Exception {
+    protected void initChannel(SocketChannel ch){
         if(ssl){
             ch.pipeline().addFirst("http-ssl", SslHelper.getHandler());
         }
@@ -54,11 +54,11 @@ public class CrawlChannelInitializer<T extends WebSite> extends HttpChannelIniti
         if(compress){
             ch.pipeline().addLast("http-decompressor", new HttpContentDecompressor());
         }
-        ch.pipeline().addLast(new WebSiteConverter<T>(clazz, charSet))
-                .addLast(new CrawlHandler<T>(resultPipeline, consumerLogic))
+        ch.pipeline().addLast(new WebSiteConverter<>(clazz, charSet))
+                .addLast(new CrawlHandler<>(resultPipeline, consumerLogic))
                 .addLast(new ChannelInboundHandlerAdapter(){
                     @Override
-                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
                         synchronized (ctx.channel()){
                             ctx.channel().notifyAll();
                         }
