@@ -16,8 +16,9 @@ public class CrawlEngineBuilder<T extends WebSite> {
         this.clazz = clazz;
     }
 
-    public CrawlEngine<T> build(){
-        CrawlChannelInitializer<T> initializer = new CrawlChannelInitializer<T>(
+    @SuppressWarnings("unchecked")
+    public Engine<T> build(){
+        CrawlChannelInitializer<T> initializer = new CrawlChannelInitializer<>(
                 engine.isSsl(), engine.isCompress(), engine.getCharSet(),
                 engine.getExpConsumer(), engine.getResConsumer(), clazz, engine.getResultPipeline());
         engine.boot(initializer);

@@ -9,7 +9,6 @@ import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 
-import javax.net.ssl.SSLException;
 import java.util.function.Consumer;
 
 /**
@@ -26,17 +25,17 @@ public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
     protected Consumer<ChannelHandlerContext> strategy;
     protected ChannelInboundHandlerAdapter bizHandler;
 
-    public HttpChannelInitializer(boolean ssl, boolean compress) throws SSLException {
+    public HttpChannelInitializer(boolean ssl, boolean compress){
         this.ssl = ssl;
         this.compress = compress;
     }
 
-    public HttpChannelInitializer(boolean ssl, boolean compress, Consumer<ChannelHandlerContext> strategy) throws SSLException {
+    public HttpChannelInitializer(boolean ssl, boolean compress, Consumer<ChannelHandlerContext> strategy){
         this(ssl, compress);
         this.strategy = strategy;
     }
 
-    public HttpChannelInitializer(boolean ssl, boolean compress, ChannelInboundHandlerAdapter bizHandler) throws SSLException {
+    public HttpChannelInitializer(boolean ssl, boolean compress, ChannelInboundHandlerAdapter bizHandler){
         this(ssl, compress);
         this.bizHandler = bizHandler;
     }
@@ -50,7 +49,7 @@ public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
     }
 
     @Override
-    protected void initChannel(SocketChannel ch) throws Exception {
+    protected void initChannel(SocketChannel ch){
         if(ssl) {
             ch.pipeline().addFirst("http-ssl", SslHelper.getHandler());
         }
@@ -66,7 +65,7 @@ public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
         // default strategy : catch and print exception and close channel.
         ch.pipeline().addLast("exception-handler", new ChannelInboundHandlerAdapter(){
             @Override
-            public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+            public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
                 if(strategy == null){
                     ctx.channel().close();
                 }else{

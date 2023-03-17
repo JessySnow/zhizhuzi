@@ -14,18 +14,15 @@ public class RedisTaskQueue implements TaskQueue {
     private final JedisPool pool;
     private final Gson gson;
 
-    private final Class<? extends WebSite> clazz;
     private final String keyPrefix;
 
     public RedisTaskQueue(Class<? extends WebSite> clazz){
-        this.clazz = clazz;
         this.gson = new Gson();
         this.pool = new JedisPool("localhost", 6379);
         this.keyPrefix = "task:"+clazz.toString();
     }
 
     public RedisTaskQueue(Class<? extends WebSite> clazz, String host, int port){
-        this.clazz = clazz;
         this.gson = new Gson();
         this.pool = new JedisPool(host, port);
         this.keyPrefix = "task:"+clazz.toString();

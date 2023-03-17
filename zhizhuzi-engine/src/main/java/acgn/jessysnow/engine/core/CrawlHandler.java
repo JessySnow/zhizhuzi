@@ -31,11 +31,10 @@ public class CrawlHandler<T extends WebSite> extends ChannelInboundHandlerAdapte
      * @param msg A Website-pojo
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        T website = (T) msg;
-
         resultPipeline.execute(() -> {
-            consumeLogic.accept(website);
+            consumeLogic.accept((T)msg);
             synchronized (ctx.channel()){
                 ctx.channel().notifyAll();
             }

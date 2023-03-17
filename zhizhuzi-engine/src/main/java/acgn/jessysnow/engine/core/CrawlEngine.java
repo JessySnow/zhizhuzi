@@ -132,6 +132,7 @@ public class CrawlEngine<T extends WebSite> implements Engine<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public T submit(CrawlTask task) {
         validateStatus(task);
         ChannelFuture future = bootstrap.connect(task.getHost(), task.getPort());
