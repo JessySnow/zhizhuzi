@@ -15,12 +15,12 @@ import java.time.Duration;
 public class EngineProxyHandler<T extends WebSite> implements InvocationHandler {
     private final CrawlEngine<T> engine;
     private final Class<T> clazz;
-    private final Browsers type;
+    private final DDomParser<T> dDomParser;
 
-    protected EngineProxyHandler(CrawlEngine<T> engine, Class<T> clazz, Browsers type){
+    protected EngineProxyHandler(CrawlEngine<T> engine, Class<T> clazz){
         this.engine = engine;
         this.clazz = clazz;
-        this.type = type;
+        this.dDomParser = new DDomParser<>();
     }
 
     @Override
@@ -28,7 +28,8 @@ public class EngineProxyHandler<T extends WebSite> implements InvocationHandler 
         String methodName = method.getName();
         if (methodName.equals("boot")){
             return method.invoke(engine, args[0]);
-        }else if (!methodName.equals("close")){
+        }else if (method.getParameterCount() == 1
+                && method.getParameterTypes()[0].equals(CrawlTask.class)){
             CrawlTask task = (CrawlTask) args[0];
             if (task.isDynamic()) {
                 Browsers type;
@@ -40,15 +41,17 @@ public class EngineProxyHandler<T extends WebSite> implements InvocationHandler 
                 WebDriver driver = DriverFactory.buildDriver(type);
                 String uri = task.getUri().toString();
                 driver.get(uri);
-                driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
+                driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(1));
 
                 T t = clazz.getConstructor().newInstance();
-                new DDomParser<>().parse(driver.findElement(By.tagName("html")), t);
+                dDomParser.parse(driver.findElement(By.tagName("html")), t);
                 t.setTask(task);
-                engine.resConsumer.accept(t);
+
+                engine.resultPipeline.execute(() -> engine.resConsumer.accept(t));
                 if (method.getName().equals("submit")){
                     return t;
                 }
+                // FIXME use auto-close
                 DriverFactory.releaseDriver(driver);
             }else{
                 return method.invoke(engine, args[0]);
