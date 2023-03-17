@@ -1,8 +1,9 @@
 package acgn.jessysnow.engine.core;
 
 import acgn.jessysnow.common.core.pojo.CrawlTask;
-import acgn.jessysnow.common.helper.SysHelper;
 import acgn.jessysnow.common.core.pojo.WebSite;
+import acgn.jessysnow.common.helper.SysHelper;
+import acgn.jessysnow.enums.Browsers;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;
@@ -38,11 +39,10 @@ public class CrawlEngine<T extends WebSite> implements Engine<T> {
     @Getter
     private String charSet = "UTF-8";
     @Getter
-    private ExecutorService resultPipeline;
-    @Getter
-    private Consumer<T> resConsumer;
-    @Getter
-    private Consumer<ChannelHandlerContext> expConsumer;
+    private Browsers browserType;
+    protected ExecutorService resultPipeline;
+    protected Consumer<T> resConsumer;
+    protected Consumer<ChannelHandlerContext> expConsumer;
 
     /**
      * @see CrawlEngineBuilder
@@ -89,6 +89,9 @@ public class CrawlEngine<T extends WebSite> implements Engine<T> {
         this.charSet = charSet;
     }
 
+    protected void setBrowserType(Browsers type) {
+        this.browserType = type;
+    }
 
     @Override
     public void close(){

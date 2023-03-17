@@ -24,6 +24,8 @@ public class CrawlTask{
     private String userAgent;
     @Getter
     private Object extend;
+    @Getter
+    private boolean isDynamic;
 
     public CrawlTask(String uri) {
         try {
@@ -71,6 +73,11 @@ public class CrawlTask{
 
     public CrawlTask attach(Object extend){
         this.extend = extend;
+        return this;
+    }
+
+    public CrawlTask dynamic(boolean isDynamic){
+        this.isDynamic = isDynamic;
         return this;
     }
 }

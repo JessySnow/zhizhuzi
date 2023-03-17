@@ -17,7 +17,7 @@ public class JDUrlSkus extends WebSite {
             @Node(nodeClassName = "m-list"),
             @Node(nodeClassName = "ml-wrap"),
             @Node(nodeId = "J_goodsList"),
-            @Node(nodeClassName = "gl-warp clearfix"),
+            @Node(nodeClassName = "gl-warp"),
             @Node(nodeClassName = "gl-item"),
             @Node(nodeAttr = "data-sku")
     })
