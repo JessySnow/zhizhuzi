@@ -12,6 +12,6 @@ jobs:
       - uses: pixta-dev/repository-mirroring-action@v1
         with:
           target_repo_url:
-	    git@124.220.64.88:JessySnow/zhizhuzi-bak.git
+	    git@124.220.64.88:JessySnow/zhizhuzi.git
           ssh_private_key:                              # <-- use 'secrets' to pass credential information.
             ${{ secrets.GITEA_SYNC }}
