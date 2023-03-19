@@ -1,36 +1,61 @@
 package acgn.jessysnow.helper;
 
-import java.time.Duration;
+import lombok.extern.log4j.Log4j2;
+
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
-// TODO finish Simple Object pool
+// FIXME A bad patch
+@Log4j2
 public final class GenericPool<T> {
-    private final int maxSize, minSize;
+    private final int minSize;
     private final Function<Void, T> constructor;
-    private final Duration cleanDuration;
+    private ConcurrentLinkedQueue<T> pool = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<Thread> waitQueue = new ConcurrentLinkedQueue<>();
 
-    private ConcurrentLinkedQueue<T> pool;
-
-    // TODO
     public T borrowObject(){
-        return null;
+        T res;
+        // CAS failed
+        while ((res = pool.poll()) == null){
+            waitQueue.offer(Thread.currentThread());
+            synchronized (Thread.currentThread()) {
+                try {
+                    log.info("{} --> wait", Thread.currentThread().getName());
+                    Thread.currentThread().wait();
+                } catch (InterruptedException ignored) {}
+            }
+        }
+        return res;
     }
 
-    // TODO
-    public void returnObject(T obj){;}
+    // wake up waiting thread
+    public void returnObject(T obj){
+        this.pool.offer(obj);
+        Thread waitThread = waitQueue.poll();
+        if (waitThread != null){
+            synchronized (waitThread){
+                log.info("notify --> {}", waitThread.getName());
+                waitThread.notify();
+            }
+        }
+    }
 
-    public GenericPool(int minSize, int maxSize, Function<Void, T> constructor, Duration cleanDuration){
+    public GenericPool(int minSize, Function<Void, T> constructor, Consumer<T> closeObj){
         this.minSize = minSize;
-        this.maxSize = maxSize;
         this.constructor = constructor;
-        this.cleanDuration = cleanDuration;
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            for (T t : pool){
+                closeObj.accept(t);
+            }
+        }));
+        initPool();
     }
 
     private void initPool(){
         this.pool = new ConcurrentLinkedQueue<>();
         for (int i = 0; i < minSize; i++) {
-            pool.add(constructor.apply(null));
+            pool.offer(constructor.apply(null));
         }
     }
 }
