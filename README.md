@@ -2,7 +2,7 @@
 > A simple and easy-to-use crawler framework based on netty
 
 ## Project structure
-- zhuzhuzi-common : Define common exceptions, enums and etc
+- zhuzhuzi-common : Define common exceptions, pojo, enums and etc
 - zhuzhuzi-engine : Download engine and configuration of framework
 - zhuzhuzi-jsoup : HTML dom parser
 - zhizhuzi-gson : Json parser
@@ -27,8 +27,23 @@
         private List<String> urlSkus;
     }
   ```
+   Supported Targeting approach:
+   - nodeTagName: Locating elements using dom tags, use enum instance instead of String
+     - nodeId: Location element using dom element's id
+     - nodeClassName: Location elements using element's class name
+     - nodeAttr: Get inner attribute value of dom element
+   
+   Support for using index or offset to locate elements more precisely, see `Node.order()` and `Node.bias()`
 
 2. Crawl item's data-sku from search.jd.com
+
+There are three ways to perform tasks:
+- execute: Return immediately after calling, asynchronously consume crawling results
+- blockExecute: After calling, wait for the crawling to end before returning
+- submit: After calling, wait for the crawling to end before returning, and return crawl result as a pojo
+
+Here is a demo of blockExecute
+
 ```java
 // Demo
 public class JDCrawlTest {
