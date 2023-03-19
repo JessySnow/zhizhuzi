@@ -5,6 +5,8 @@ import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.edge.EdgeDriver;
 
+import java.lang.management.ManagementFactory;
+
 public class ObjPoolTest {
     @Test
     public void testPool() throws InterruptedException {
@@ -25,5 +27,12 @@ public class ObjPoolTest {
             thread.start();
             thread.join();
         }
+    }
+
+    @Test
+    public void SystemInfoTest(){
+        com.sun.management.OperatingSystemMXBean mxbean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        long totalMemorySize = mxbean.getTotalMemorySize();
+        System.out.println("System max memory size(GB): " + (totalMemorySize >> 30));
     }
 }

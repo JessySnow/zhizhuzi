@@ -1,34 +1,74 @@
 package acgn.jessysnow.driver;
 
 import acgn.jessysnow.enums.Browsers;
+import acgn.jessysnow.helper.GenericPool;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.safari.SafariDriver;
 
+import java.lang.management.ManagementFactory;
+
 /**
- * FIXME Pooling support
  * WebSelenium Driver Factory
  */
 public class DriverFactory {
-    DriverFactory(){}
+    private static final int MEM_SIZE;
+    private static GenericPool<EdgeDriver> edgeDriverPool;
+    private static GenericPool<ChromeDriver> chromeDriverPool;
+    private static GenericPool<SafariDriver> safariDriverPool;
+    private static GenericPool<FirefoxDriver> fireFoxDriverPool;
 
-    //TODO Use polling resources
+    static {
+        MEM_SIZE = _MAX_SIZE_DRIVER_POOL();
+    }
+
+
     public static WebDriver buildDriver(Browsers type){
-        WebDriver driver;
+        WebDriver driver = null;
         switch (type){
-            case Edge -> driver = new EdgeDriver();
-            case Chrome -> driver = new ChromeDriver();
-            case Safari -> driver = new SafariDriver();
-            case FireFox -> driver = new FirefoxDriver();
-            default -> driver = null;
+            case Edge: {
+                if (edgeDriverPool == null){
+                }else {
+                    return edgeDriverPool.borrowObject();
+                }
+                break;
+            }
+            case Chrome: {
+                if (chromeDriverPool == null){
+
+                }else {
+                    return chromeDriverPool.borrowObject();
+                }
+                break;
+            }
+            case Safari: {
+                if (safariDriverPool == null){
+
+                }else {
+                    return safariDriverPool.borrowObject();
+                }
+                break;
+            }
+            case FireFox: {
+                if (fireFoxDriverPool == null){
+
+                }else {
+                    return fireFoxDriverPool.borrowObject();
+                }
+                break;
+            }
         }
+
         return driver;
     }
 
-    // FIXME
-    public static void releaseDriver(WebDriver driver){
-        driver.close();
+    public static void releaseDriver(WebDriver driver){}
+
+    private static int _MAX_SIZE_DRIVER_POOL(){
+        com.sun.management.OperatingSystemMXBean sysBean = (com.sun.management.OperatingSystemMXBean)
+                ManagementFactory.getOperatingSystemMXBean();
+        return (int) (sysBean.getTotalMemorySize() >> 30);
     }
 }
