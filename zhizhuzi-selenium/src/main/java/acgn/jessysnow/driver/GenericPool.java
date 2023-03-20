@@ -1,4 +1,4 @@
-package acgn.jessysnow.helper;
+package acgn.jessysnow.driver;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -6,18 +6,24 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-// FIXME A bad patch
 @Log4j2
 public final class GenericPool<T> {
-    private final int minSize;
+    private final int size;
+    private volatile int current = 0;
     private final Function<Void, T> constructor;
-    private ConcurrentLinkedQueue<T> pool = new ConcurrentLinkedQueue<>();
+
+    // driver pool
+    private final ConcurrentLinkedQueue<T> pool = new ConcurrentLinkedQueue<>();
+    // mq
     private final ConcurrentLinkedQueue<Thread> waitQueue = new ConcurrentLinkedQueue<>();
 
     public T borrowObject(){
         T res;
-        // CAS failed
         while ((res = pool.poll()) == null){
+            if (current < size){
+
+            }
+
             waitQueue.offer(Thread.currentThread());
             synchronized (Thread.currentThread()) {
                 try {
@@ -29,7 +35,8 @@ public final class GenericPool<T> {
         return res;
     }
 
-    // wake up waiting thread
+    // FIXME use smaller range of supresswarning annonation
+    @SuppressWarnings("all")
     public void returnObject(T obj){
         this.pool.offer(obj);
         Thread waitThread = waitQueue.poll();
@@ -41,21 +48,9 @@ public final class GenericPool<T> {
         }
     }
 
-    public GenericPool(int minSize, Function<Void, T> constructor, Consumer<T> closeObj){
-        this.minSize = minSize;
+    GenericPool(int size, Function<Void, T> constructor, Consumer<T> closeObj){
+        this.size = size;
         this.constructor = constructor;
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            for (T t : pool){
-                closeObj.accept(t);
-            }
-        }));
-        initPool();
-    }
-
-    private void initPool(){
-        this.pool = new ConcurrentLinkedQueue<>();
-        for (int i = 0; i < minSize; i++) {
-            pool.offer(constructor.apply(null));
-        }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> pool.forEach(closeObj)));
     }
 }

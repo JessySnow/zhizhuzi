@@ -1,6 +1,5 @@
-package acgn.jessysnow.parser;
+package acgn.jessysnow.driver;
 
-import acgn.jessysnow.helper.GenericPool;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.edge.EdgeDriver;

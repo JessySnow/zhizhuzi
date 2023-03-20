@@ -1,7 +1,6 @@
 package acgn.jessysnow.driver;
 
 import acgn.jessysnow.enums.Browsers;
-import acgn.jessysnow.helper.GenericPool;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeDriver;
