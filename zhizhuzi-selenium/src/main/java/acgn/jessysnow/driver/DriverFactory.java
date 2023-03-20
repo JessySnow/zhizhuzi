@@ -1,6 +1,7 @@
 package acgn.jessysnow.driver;
 
 import acgn.jessysnow.enums.Browsers;
+import acgn.jessysnow.helper.UnsafeHelper;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeDriver;
@@ -9,7 +10,6 @@ import org.openqa.selenium.safari.SafariDriver;
 import sun.misc.Unsafe;
 
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Field;
 
 /**
  * WebSelenium Driver Factory
@@ -27,7 +27,7 @@ public class DriverFactory {
     private static long fireFoxOffset;
 
     static {
-        unsafe = getUnsafe();
+        unsafe = UnsafeHelper.getUnsafe();
         int MEM_SIZE = _MAX_SIZE_DRIVER_POOL();
         POOL_SIZE = MEM_SIZE > 4 ? (MEM_SIZE - 4) * 2 : 2;
         _INIT_OFFSET();
@@ -97,17 +97,5 @@ public class DriverFactory {
             safariOffset = unsafe.staticFieldOffset(DriverFactory.class.getDeclaredField("safariDriverPool"));
             fireFoxOffset = unsafe.staticFieldOffset(DriverFactory.class.getDeclaredField("fireFoxDriverPool"));
         } catch (NoSuchFieldException ignored) {}
-    }
-
-    private static Unsafe getUnsafe(){
-        Unsafe unsafe;
-        try {
-            Field f = Unsafe.class.getDeclaredField("theUnsafe");
-            f.setAccessible(true);
-            unsafe = (Unsafe) f.get(null);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-        return unsafe;
     }
 }
