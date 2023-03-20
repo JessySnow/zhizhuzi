@@ -1,5 +1,6 @@
 package acgn.jessysnow.driver;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.edge.EdgeDriver;
@@ -31,7 +32,7 @@ public class ObjPoolTest {
     @Test
     public void SystemInfoTest(){
         com.sun.management.OperatingSystemMXBean mxbean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-        long totalMemorySize = mxbean.getTotalMemorySize();
-        System.out.println("System max memory size(GB): " + (totalMemorySize >> 30));
+        long totalMemorySize = mxbean.getTotalMemorySize() >> 30;
+        Assert.assertTrue(totalMemorySize > 0 && totalMemorySize < 100);
     }
 }

@@ -48,7 +48,7 @@ public final class GenericPool<T> {
     // FIXME use smaller range of supresswarning annonation
     @SuppressWarnings("all")
     public void returnObject(T obj){
-        while (current >= size){
+        while (current > size){
             int origin = current;
             if (unsafe.compareAndSwapInt(this, currentByteOffset, origin, origin - 1)){
                 closeObj.accept(obj);
