@@ -1,9 +1,9 @@
 package acgn.jessysnow.engine.core;
 
-import acgn.jessysnow.common.pojo.CrawlTask;
+import acgn.jessysnow.common.core.pojo.CrawlTask;
 import acgn.jessysnow.gson.pojo.Json;
 import acgn.jessysnow.jsoup.parser.DomParser;
-import acgn.jessysnow.jsoup.pojo.WebSite;
+import acgn.jessysnow.common.core.pojo.WebSite;
 import com.google.gson.Gson;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
@@ -22,6 +22,7 @@ import java.util.List;
 public class WebSiteConverter<T extends WebSite> extends MessageToMessageDecoder<HttpContent> {
     private final Class<T> clazz;
     private final String charSet;
+    private final DomParser<T> domParser = new DomParser<>();
 
     public WebSiteConverter(Class<T> clazz, String charSet){
         this.clazz = clazz;
@@ -29,6 +30,7 @@ public class WebSiteConverter<T extends WebSite> extends MessageToMessageDecoder
     }
 
     @Override
+    @SuppressWarnings("ConstantConditions")
     protected void decode(ChannelHandlerContext ctx, HttpContent msg, List<Object> out) throws Exception {
         String response = msg.content().toString(Charset.forName(charSet));
 
@@ -38,8 +40,7 @@ public class WebSiteConverter<T extends WebSite> extends MessageToMessageDecoder
             res = gson.fromJson(response, clazz);
         }else if (WebSite.class.isAssignableFrom(clazz)) {
             Document document = Jsoup.parse(response);
-            DomParser<T> parser = new DomParser<>();
-            res = parser.parse(document, clazz.getConstructor().newInstance());
+            res = domParser.parse(document, clazz.getConstructor().newInstance());
         }
 
         Attribute<Object> attr = ctx.channel().attr(AttributeKey.valueOf(ctx.channel().id().asShortText()));

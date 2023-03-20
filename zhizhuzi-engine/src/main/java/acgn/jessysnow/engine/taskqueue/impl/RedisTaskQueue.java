@@ -1,8 +1,8 @@
 package acgn.jessysnow.engine.taskqueue.impl;
 
-import acgn.jessysnow.common.pojo.CrawlTask;
+import acgn.jessysnow.common.core.pojo.CrawlTask;
 import acgn.jessysnow.engine.taskqueue.TaskQueue;
-import acgn.jessysnow.jsoup.pojo.WebSite;
+import acgn.jessysnow.common.core.pojo.WebSite;
 import com.google.gson.Gson;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -14,18 +14,15 @@ public class RedisTaskQueue implements TaskQueue {
     private final JedisPool pool;
     private final Gson gson;
 
-    private final Class<? extends WebSite> clazz;
     private final String keyPrefix;
 
     public RedisTaskQueue(Class<? extends WebSite> clazz){
-        this.clazz = clazz;
         this.gson = new Gson();
         this.pool = new JedisPool("localhost", 6379);
         this.keyPrefix = "task:"+clazz.toString();
     }
 
     public RedisTaskQueue(Class<? extends WebSite> clazz, String host, int port){
-        this.clazz = clazz;
         this.gson = new Gson();
         this.pool = new JedisPool(host, port);
         this.keyPrefix = "task:"+clazz.toString();

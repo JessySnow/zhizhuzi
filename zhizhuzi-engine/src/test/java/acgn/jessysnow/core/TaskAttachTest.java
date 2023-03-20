@@ -1,8 +1,8 @@
 package acgn.jessysnow.core;
 
-import acgn.jessysnow.common.pojo.CrawlTask;
-import acgn.jessysnow.engine.core.CrawlEngine;
+import acgn.jessysnow.common.core.pojo.CrawlTask;
 import acgn.jessysnow.engine.core.CrawlEngineBuilder;
+import acgn.jessysnow.engine.core.Engine;
 import acgn.jessysnow.jsoup.helper.WebsiteConsumer;
 import acgn.jessysnow.jsoup.sample.JDUrlSkus;
 import org.junit.jupiter.api.Assertions;
@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 
 public class TaskAttachTest {
     @Test
-    public void testAttachObject() {
-        try (CrawlEngine<JDUrlSkus> engine =
+    public void testAttachObject() throws Exception {
+        try (Engine<JDUrlSkus> engine =
                      new CrawlEngineBuilder<>(JDUrlSkus.class)
                              .ssl(true)
                              .compress(true)

@@ -1,15 +1,14 @@
-package acgn.jessysnow.jsoup.parser;
+package acgn.jessysnow.parser;
 
-import acgn.jessysnow.common.core.interfaces.Parser;
-import acgn.jessysnow.common.exception.UnsupportedTypeException;
 import acgn.jessysnow.common.core.annotation.Node;
 import acgn.jessysnow.common.core.annotation.Nodes;
 import acgn.jessysnow.common.core.enums.NodeTagName;
+import acgn.jessysnow.common.core.interfaces.Parser;
 import acgn.jessysnow.common.core.pojo.WebSite;
+import acgn.jessysnow.common.exception.UnsupportedTypeException;
 import lombok.extern.log4j.Log4j2;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -21,23 +20,11 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-
-/**
- * Parser a Html document by HTML DOM-Tree
- * Thread safe util class
- */
 @Log4j2
-public class DomParser<T extends WebSite> implements Parser<T> {
-
-    /**
-     * Parse site according to annotation on the field of site
-     * @param obj Jsoup document object
-     * @param site An empty pojo of website, will be updated in place
-     * @return site
-     */
+public class DDomParser<T extends WebSite> implements Parser<T> {
     @Override
     public T parse(Object obj, T site) {
-        if (! (obj instanceof Document html)){
+        if (!(obj instanceof WebElement html)){
             throw new IllegalArgumentException("Param obj need to be a Jsoup document");
         }
 
@@ -79,10 +66,9 @@ public class DomParser<T extends WebSite> implements Parser<T> {
         return site;
     }
 
-
-    private String parseSingle(Document html, Nodes nodes){
+    private String parseSingle(WebElement html, Nodes nodes){
         String res = null;
-        Element index = html;
+        WebElement index = html;
         Node[] nodeArray = nodes.domNodes();
         for (Node node : nodeArray){
             // Parse failed, set field to null
@@ -91,39 +77,39 @@ public class DomParser<T extends WebSite> implements Parser<T> {
                 break;
             }
             if (isNotBlank(node.nodeId())){
-                index = index.getElementById(node.nodeId());
+                index = index.findElement(By.id(node.nodeId()));
             }else if (isNotBlank(node.nodeClassName())){
                 // If the order is not specified, get the first one
-                Elements elementsByClass = index.getElementsByClass(node.nodeClassName());
-                if (elementsByClass.size() == 0){
+                List<WebElement> webElements = index.findElements(By.className(node.nodeClassName()));
+                if (webElements.size() == 0){
                     res = null;
                     break;
                 }
-                index = elementsByClass.get(node.order());
+                index = webElements.get(node.order());
             }else if(!node.nodeTagName().name().equals("NULL")){
                 if (node.nodeTagName().equals(NodeTagName._text)){
-                    res = index.text();
+                    res = index.getText();
                     break;
                 }else if (node.nodeTagName().equals(NodeTagName._document)){
                     // Bozo operation
-                    index = index.ownerDocument();
+                    throw new UnsupportedOperationException("Selenium DDomParser unsupported");
                 }else {
-                    Elements elementsByTag = index.getElementsByTag(node.nodeTagName().name());
-                    index = elementsByTag.get(node.order());
+                    List<WebElement> elements = index.findElements(By.tagName(node.nodeTagName().name()));
+                    index = elements.get(node.order());
                 }
             }else {
                 if(isBlank(node.nodeAttr())){
                     res = null;
                     break;
                 }
-                res = index.attr(node.nodeAttr());
+                res = index.getAttribute(node.nodeAttr());
             }
         }
         return res;
     }
 
-    private List<String> parseMulti(Document html, Nodes nodes){
-        Deque<Elements> queue = new ArrayDeque<>();
+    private List<String> parseMulti(WebElement html, Nodes nodes){
+        Deque<List<WebElement>> queue = new ArrayDeque<>();
         List<String> res = new ArrayList<>();
         Node[] nodeArray = nodes.domNodes();
         if(nodeArray == null || nodeArray.length == 0){
@@ -132,11 +118,11 @@ public class DomParser<T extends WebSite> implements Parser<T> {
 
         // First node enqueue
         Node firstNode = nodeArray[0];
-        Elements elements = fetchElementByNode(html, firstNode);
+        List<WebElement> elements = fetchElementByNode(html, firstNode);
         // First node broken
         if (elements == null && !firstNode.nodeTagName().equals(NodeTagName._text)
                 && firstNode.nodeAttr().equals("")
-            ){
+        ){
             return null;
         }
         queue.offer(elements);
@@ -147,16 +133,16 @@ public class DomParser<T extends WebSite> implements Parser<T> {
             if (queue.size() > 0){
                 int size = queue.size();
                 for (int j = 0; j < size; j++) {
-                    Elements elementsParent = queue.poll();
-                    for (Element e : elementsParent){
-                        Elements elementsSon = fetchElementByNode(e, node);
+                    List<WebElement> elementsParent = queue.poll();
+                    for (WebElement e : elementsParent){
+                        List<WebElement> elementsSon = fetchElementByNode(e, node);
                         // Cut off node chain in this element
                         if(elementsSon == null && node.nodeTagName().equals(NodeTagName._text)
-                        || !node.nodeAttr().equals("")){
+                                || !node.nodeAttr().equals("")){
                             if (node.nodeTagName().equals(NodeTagName._text)){
-                                res.add(e.text());
+                                res.add(e.getText());
                             }else {
-                                res.add(e.attr(node.nodeAttr()));
+                                res.add(e.getAttribute(node.nodeAttr()));
                             }
                         }else if (elementsSon != null){
                             queue.offer(elementsSon);
@@ -169,23 +155,18 @@ public class DomParser<T extends WebSite> implements Parser<T> {
         return res;
     }
 
-    private Elements fetchElementByNode(Element element, Node node){
+    private List<WebElement> fetchElementByNode(WebElement element, Node node){
         if(isNotBlank(node.nodeId())){
-            Element e = element.getElementById(node.nodeId());
-            if(e != null){
-                return new Elements(e);
-            }else {
-                return null;
-            }
+            return element.findElements(By.id(node.nodeId()));
         }else if(isNotBlank(node.nodeClassName())){
-            return element.getElementsByClass(node.nodeClassName());
+            return element.findElements(By.className(node.nodeClassName()));
         }else if (!node.nodeTagName().name().equals("NULL")){
             if (node.nodeTagName().equals(NodeTagName._text)){
                 return null;
             }else if (node.nodeTagName().equals(NodeTagName._document)){
                 log.error(new UnsupportedTypeException("Can't apply #document tagName to multi search"));
             }else {
-                return element.getElementsByTag(node.nodeTagName().name());
+                return element.findElements(By.tagName(node.nodeTagName().name()));
             }
         }else{
             return null;

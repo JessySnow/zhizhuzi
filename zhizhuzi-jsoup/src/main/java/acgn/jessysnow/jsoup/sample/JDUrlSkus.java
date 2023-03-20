@@ -1,9 +1,9 @@
 package acgn.jessysnow.jsoup.sample;
 
-import acgn.jessysnow.jsoup.annotation.Node;
-import acgn.jessysnow.jsoup.annotation.Nodes;
-import acgn.jessysnow.jsoup.enums.NodeTagName;
-import acgn.jessysnow.jsoup.pojo.WebSite;
+import acgn.jessysnow.common.core.annotation.Node;
+import acgn.jessysnow.common.core.annotation.Nodes;
+import acgn.jessysnow.common.core.enums.NodeTagName;
+import acgn.jessysnow.common.core.pojo.WebSite;
 import lombok.Getter;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public class JDUrlSkus extends WebSite {
             @Node(nodeClassName = "m-list"),
             @Node(nodeClassName = "ml-wrap"),
             @Node(nodeId = "J_goodsList"),
-            @Node(nodeClassName = "gl-warp clearfix"),
+            @Node(nodeClassName = "gl-warp"),
             @Node(nodeClassName = "gl-item"),
             @Node(nodeAttr = "data-sku")
     })

@@ -1,5 +1,6 @@
 package acgn.jessysnow.jsoup.parser;
 
+import acgn.jessysnow.common.core.interfaces.Parser;
 import acgn.jessysnow.jsoup.sample.SimpleHtml;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

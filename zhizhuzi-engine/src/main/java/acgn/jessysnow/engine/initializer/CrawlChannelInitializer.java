@@ -3,7 +3,7 @@ package acgn.jessysnow.engine.initializer;
 import acgn.jessysnow.engine.core.CrawlHandler;
 import acgn.jessysnow.engine.core.WebSiteConverter;
 import acgn.jessysnow.engine.helper.SslHelper;
-import acgn.jessysnow.jsoup.pojo.WebSite;
+import acgn.jessysnow.common.core.pojo.WebSite;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
@@ -45,7 +45,7 @@ public class CrawlChannelInitializer<T extends WebSite> extends HttpChannelIniti
      *          --> CrawlHandler --> ExceptionHandler
      */
     @Override
-    protected void initChannel(SocketChannel ch) throws Exception {
+    protected void initChannel(SocketChannel ch){
         if(ssl){
             ch.pipeline().addFirst("http-ssl", SslHelper.getHandler());
         }
@@ -54,11 +54,11 @@ public class CrawlChannelInitializer<T extends WebSite> extends HttpChannelIniti
         if(compress){
             ch.pipeline().addLast("http-decompressor", new HttpContentDecompressor());
         }
-        ch.pipeline().addLast(new WebSiteConverter<T>(clazz, charSet))
-                .addLast(new CrawlHandler<T>(resultPipeline, consumerLogic))
+        ch.pipeline().addLast(new WebSiteConverter<>(clazz, charSet))
+                .addLast(new CrawlHandler<>(resultPipeline, consumerLogic))
                 .addLast(new ChannelInboundHandlerAdapter(){
                     @Override
-                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
                         synchronized (ctx.channel()){
                             ctx.channel().notifyAll();
                         }

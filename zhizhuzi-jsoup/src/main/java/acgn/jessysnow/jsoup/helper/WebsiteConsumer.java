@@ -1,16 +1,13 @@
 package acgn.jessysnow.jsoup.helper;
 
-import acgn.jessysnow.jsoup.annotation.Nodes;
-import acgn.jessysnow.jsoup.pojo.WebSite;
+import acgn.jessysnow.common.core.annotation.Nodes;
+import acgn.jessysnow.common.core.pojo.WebSite;
 import lombok.extern.log4j.Log4j2;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
 
-/**
- * Consume Website we crawl
- */
 @Log4j2
 public class WebsiteConsumer {
     public static void toConsole(WebSite webSite) {
@@ -35,7 +32,6 @@ public class WebsiteConsumer {
             field.setAccessible(true);
             Object o = null;
 
-            // Do noting
             try {
                 o = field.get(webSite);
             } catch (IllegalAccessException ignored){}
@@ -50,15 +46,18 @@ public class WebsiteConsumer {
             return ;
         }
 
-        if (result.getClass().equals(String.class)){
-            String fieldName = field.getName();
-            System.out.printf("%s : %s", fieldName, result);
-        }else if (result instanceof List<?> list){
-            System.out.println(field.getName());
-            if (list.size() > 0 && !list.get(0).getClass().equals(String.class)){
-                log.error("{} field's type unsupported", field.getName());
+        if (result instanceof List<?> list && list.size() > 0){
+            System.out.printf("%s(%s): \n\t", field.getName(), result.getClass());
+            for (int i = 1; i <= list.size(); i++) {
+                if (i % 5 == 0){
+                    System.out.printf("%s\n\t", list.get(i - 1));
+                }else{
+                    System.out.printf("%s, ", list.get(i - 1));
+                }
             }
-            list.forEach(item -> System.out.printf("%s ", item));
+            System.out.println();
+        }else{
+            System.out.printf("%s(%s) : %s\n", field.getName(), result.getClass(), result);
         }
     }
 }

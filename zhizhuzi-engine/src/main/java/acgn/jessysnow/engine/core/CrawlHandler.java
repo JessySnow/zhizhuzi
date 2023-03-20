@@ -1,11 +1,9 @@
 package acgn.jessysnow.engine.core;
 
-import acgn.jessysnow.jsoup.pojo.WebSite;
+import acgn.jessysnow.common.core.pojo.WebSite;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
 
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
@@ -33,11 +31,10 @@ public class CrawlHandler<T extends WebSite> extends ChannelInboundHandlerAdapte
      * @param msg A Website-pojo
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        T website = (T) msg;
-
         resultPipeline.execute(() -> {
-            consumeLogic.accept(website);
+            consumeLogic.accept((T)msg);
             synchronized (ctx.channel()){
                 ctx.channel().notifyAll();
             }
