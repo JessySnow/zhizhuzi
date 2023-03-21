@@ -24,7 +24,6 @@ public final class GenericPool<T> {
 
     public T borrowObject() {
         T res;
-        // CAS
         while ((res = pool.poll()) == null) {
             final int origin = current;
             if (origin < size) {
@@ -49,13 +48,6 @@ public final class GenericPool<T> {
     // FIXME use smaller range of supresswarning annonation
     @SuppressWarnings("all")
     public void returnObject(T obj) {
-        while (current > size) {
-            int origin = current;
-            if (unsafe.compareAndSwapInt(this, currentByteOffset, origin, origin - 1)) {
-                closeObj.accept(obj);
-            }
-        }
-
         this.pool.offer(obj);
         Thread waitThread = waitQueue.poll();
         if (waitThread != null) {

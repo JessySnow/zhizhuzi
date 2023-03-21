@@ -10,7 +10,7 @@ import java.lang.management.ManagementFactory;
 public class ObjPoolTest {
     @Test
     public void testPool() throws InterruptedException {
-        GenericPool<WebDriver> webDriverGenericPool = new GenericPool<>(1, (V) -> new EdgeDriver(),
+        GenericPool<WebDriver> webDriverGenericPool = new GenericPool<>(3, (V) -> new EdgeDriver(),
                 WebDriver::close);
         for (int i = 0; i < 10; i++) {
             Thread thread = new Thread(() -> {
@@ -18,6 +18,7 @@ public class ObjPoolTest {
                 try {
                     driver.get("https://south-plus.org");
                     Thread.sleep(4096);
+                    System.out.println("Here");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } finally {
@@ -25,8 +26,8 @@ public class ObjPoolTest {
                 }
             });
             thread.start();
-            thread.join();
         }
+        Thread.sleep(4096 * 11);
     }
 
     @Test
