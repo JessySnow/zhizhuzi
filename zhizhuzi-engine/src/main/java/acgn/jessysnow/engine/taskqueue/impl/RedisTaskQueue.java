@@ -1,13 +1,14 @@
 package acgn.jessysnow.engine.taskqueue.impl;
 
 import acgn.jessysnow.common.core.pojo.CrawlTask;
-import acgn.jessysnow.engine.taskqueue.TaskQueue;
 import acgn.jessysnow.common.core.pojo.WebSite;
+import acgn.jessysnow.engine.taskqueue.TaskQueue;
 import com.google.gson.Gson;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.util.List;
+import java.util.Optional;
 
 // Blocking task queue
 public class RedisTaskQueue implements TaskQueue {
@@ -41,7 +42,7 @@ public class RedisTaskQueue implements TaskQueue {
     @Override
     public CrawlTask poll() {
         try(Jedis jedis = pool.getResource()){
-            List<String> pair = jedis.brpop(keyPrefix);
+            List<String> pair = jedis.brpop(0, keyPrefix);
             return gson.fromJson(pair.get(1), CrawlTask.class);
         }
     }
@@ -51,7 +52,9 @@ public class RedisTaskQueue implements TaskQueue {
     public CrawlTask poll(int timeout) {
         try(Jedis jedis = pool.getResource()){
             List<String> pair = jedis.brpop(timeout, keyPrefix);
-            return gson.fromJson(pair.get(1), CrawlTask.class);
+            return Optional.ofNullable(pair)
+                    .map((t) -> gson.fromJson(t.get(1), CrawlTask.class))
+                    .orElse(null);
         }
     }
 
