@@ -7,6 +7,7 @@ import acgn.jessysnow.enums.Browsers;
 import acgn.jessysnow.parser.DDomParser;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -41,18 +42,19 @@ public class EngineProxyHandler<T extends WebSite> implements InvocationHandler 
                 WebDriver driver = DriverFactory.buildDriver(type);
                 String uri = task.getUri().toString();
                 driver.get(uri);
-                driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(1));
+                driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
 
                 T t = clazz.getConstructor().newInstance();
-                dDomParser.parse(driver.findElement(By.tagName("html")), t);
+                WebElement html = driver.findElement(By.tagName("html"));
+                DriverFactory.releaseDriver(driver);
+
+                dDomParser.parse(html , t);
                 t.setTask(task);
 
                 engine.resultPipeline.execute(() -> engine.resConsumer.accept(t));
                 if (method.getName().equals("submit")){
                     return t;
                 }
-                // FIXME use auto-close
-                DriverFactory.releaseDriver(driver);
             }else{
                 return method.invoke(engine, args[0]);
             }

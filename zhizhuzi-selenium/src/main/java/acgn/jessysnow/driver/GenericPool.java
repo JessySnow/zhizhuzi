@@ -22,24 +22,24 @@ public final class GenericPool<T> {
     // mq
     private final ConcurrentLinkedQueue<Thread> waitQueue = new ConcurrentLinkedQueue<>();
 
-    public T borrowObject(){
+    public T borrowObject() {
         T res;
-        // CAS
-        while ((res = pool.poll()) == null){
+        while ((res = pool.poll()) == null) {
             final int origin = current;
-            if (origin < size){
-                if (unsafe.compareAndSwapInt(this, currentByteOffset, origin, origin + 1)){
+            if (origin < size) {
+                if (unsafe.compareAndSwapInt(this, currentByteOffset, origin, origin + 1)) {
                     res = constructor.apply(null);
                     break;
                 }
-            }
-
-            waitQueue.offer(Thread.currentThread());
-            synchronized (Thread.currentThread()) {
-                try {
-                    log.info("{} --> wait", Thread.currentThread().getName());
-                    Thread.currentThread().wait();
-                } catch (InterruptedException ignored) {}
+            } else {
+                waitQueue.offer(Thread.currentThread());
+                synchronized (Thread.currentThread()) {
+                    try {
+                        log.info("{} --> wait", Thread.currentThread().getName());
+                        Thread.currentThread().wait();
+                    } catch (InterruptedException ignored) {
+                    }
+                }
             }
         }
         return res;
@@ -47,18 +47,11 @@ public final class GenericPool<T> {
 
     // FIXME use smaller range of supresswarning annonation
     @SuppressWarnings("all")
-    public void returnObject(T obj){
-        while (current > size){
-            int origin = current;
-            if (unsafe.compareAndSwapInt(this, currentByteOffset, origin, origin - 1)){
-                closeObj.accept(obj);
-            }
-        }
-
+    public void returnObject(T obj) {
         this.pool.offer(obj);
         Thread waitThread = waitQueue.poll();
-        if (waitThread != null){
-            synchronized (waitThread){
+        if (waitThread != null) {
+            synchronized (waitThread) {
                 log.info("notify --> {}", waitThread.getName());
                 waitThread.notify();
             }
@@ -66,14 +59,14 @@ public final class GenericPool<T> {
     }
 
     @SuppressWarnings("deprecation")
-    GenericPool(int size, Function<Void, T> constructor, Consumer<T> closeObj){
+    GenericPool(int size, Function<Void, T> constructor, Consumer<T> closeObj) {
         this.size = size;
         this.constructor = constructor;
         this.closeObj = closeObj;
         this.unsafe = UnsafeHelper.getUnsafe();
         try {
             currentByteOffset = unsafe.objectFieldOffset(this.getClass().getDeclaredField("current"));
-        } catch (NoSuchFieldException ignored) {;}
+        } catch (NoSuchFieldException ignored) {}
         Runtime.getRuntime().addShutdownHook(new Thread(() -> pool.forEach(closeObj)));
     }
 }
