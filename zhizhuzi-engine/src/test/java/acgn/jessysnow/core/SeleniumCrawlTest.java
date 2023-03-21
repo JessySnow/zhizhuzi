@@ -24,12 +24,16 @@ public class SeleniumCrawlTest {
                             .charSet("UTF-8")
                             .browserType(Browsers.Edge)
                             .build()){
-
+            new Thread(()->
             engine.execute(new CrawlTask("https://search.jd.com/Search?keyword=GPW2")
-                    .attach("https://search.jd.com/Search?keyword=GPW2").dynamic(true));
+                    .attach("https://search.jd.com/Search?keyword=GPW2").dynamic(true)))
+                    .start();
+            new Thread(() ->
             engine.execute(new CrawlTask("https://search.jd.com/Search?keyword=G304")
-                    .attach("https://search.jd.com/Search?keyword=G304").dynamic(true));
-            Thread.sleep(2000);
+                    .attach("https://search.jd.com/Search?keyword=G304").dynamic(true)))
+                    .start();
+            Thread.sleep(5000);
+//            while (true);
         }
     }
 
