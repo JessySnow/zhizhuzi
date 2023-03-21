@@ -74,9 +74,7 @@ public final class GenericPool<T> {
         this.unsafe = UnsafeHelper.getUnsafe();
         try {
             currentByteOffset = unsafe.objectFieldOffset(this.getClass().getDeclaredField("current"));
-        } catch (NoSuchFieldException ignored) {
-            ;
-        }
+        } catch (NoSuchFieldException ignored) {}
         Runtime.getRuntime().addShutdownHook(new Thread(() -> pool.forEach(closeObj)));
     }
 }

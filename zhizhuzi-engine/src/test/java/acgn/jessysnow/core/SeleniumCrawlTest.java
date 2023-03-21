@@ -33,7 +33,6 @@ public class SeleniumCrawlTest {
                     .attach("https://search.jd.com/Search?keyword=G304").dynamic(true)))
                     .start();
             Thread.sleep(5000);
-//            while (true);
         }
     }
 
