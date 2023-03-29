@@ -7,6 +7,7 @@ import acgn.jessysnow.enums.Browsers;
 import acgn.jessysnow.parser.DDomParser;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -45,11 +46,20 @@ public class EngineProxyHandler<T extends WebSite> implements InvocationHandler 
                 WebElement html;
                 try {
                     String uri = task.getUri().toString();
+
                     if (!StringUtils.isEmpty(task.getCookie())){
-                        // initialize cookie context
+                        // selenium cookie context prepare
                         driver.get(uri);
+
                         driver.manage().deleteAllCookies();
-                        // FIXME here need cookie add here
+                        String[] cookies = task.getCookie().split("; ");
+
+                        for (String cookie : cookies){
+                            String cookieName = cookie.substring(0, cookie.indexOf("="));
+                            String cookieValue = cookieName.substring(cookie.indexOf("=") + 1);
+                            driver.manage().addCookie(new Cookie(cookieName, cookieValue));
+                        }
+
                     }
 
                     driver.get(uri);
