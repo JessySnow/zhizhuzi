@@ -11,6 +11,7 @@ import java.util.function.Function;
 @Log4j2
 public final class GenericPool<T> {
     private final int size;
+    // updated by CAS
     private int current = 0;
     private long currentByteOffset;
     private final Function<Void, T> constructor;

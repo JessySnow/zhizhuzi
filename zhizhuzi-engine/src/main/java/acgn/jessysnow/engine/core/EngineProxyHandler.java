@@ -5,6 +5,7 @@ import acgn.jessysnow.common.core.pojo.WebSite;
 import acgn.jessysnow.driver.DriverFactory;
 import acgn.jessysnow.enums.Browsers;
 import acgn.jessysnow.parser.DDomParser;
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -44,6 +45,13 @@ public class EngineProxyHandler<T extends WebSite> implements InvocationHandler 
                 WebElement html;
                 try {
                     String uri = task.getUri().toString();
+                    if (!StringUtils.isEmpty(task.getCookie())){
+                        // initialize cookie context
+                        driver.get(uri);
+                        driver.manage().deleteAllCookies();
+                        // FIXME here need cookie add here
+                    }
+
                     driver.get(uri);
                     driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
 
