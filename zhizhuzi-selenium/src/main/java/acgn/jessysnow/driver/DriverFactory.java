@@ -42,28 +42,28 @@ public class DriverFactory {
                     unsafe.compareAndSwapObject(DriverFactory.class, edgeOffset, null,
                             new GenericPool<>(POOL_SIZE, EdgeDriver::new, WebDriver::close));
                 }
-                return edgeDriverPool.borrowObject();
+                driver = edgeDriverPool.borrowObject();
             }
             case Chrome -> {
                 while (chromeDriverPool == null) {
                     unsafe.compareAndSwapObject(DriverFactory.class, chromeOffset, null,
                             new GenericPool<>(POOL_SIZE, ChromeDriver::new, WebDriver::close));
                 }
-                return chromeDriverPool.borrowObject();
+                driver = chromeDriverPool.borrowObject();
             }
             case Safari -> {
                 while (safariDriverPool == null) {
                     unsafe.compareAndSwapObject(DriverFactory.class, safariOffset, null,
                             new GenericPool<>(POOL_SIZE, SafariDriver::new, WebDriver::close));
                 }
-                return safariDriverPool.borrowObject();
+                driver = safariDriverPool.borrowObject();
             }
             case FireFox -> {
                 while (fireFoxDriverPool == null) {
                     unsafe.compareAndSwapObject(DriverFactory.class, fireFoxOffset, null,
                             new GenericPool<>(POOL_SIZE, FirefoxDriver::new, WebDriver::close));
                 }
-                return fireFoxDriverPool.borrowObject();
+                driver = fireFoxDriverPool.borrowObject();
             }
         }
 
