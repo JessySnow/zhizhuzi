@@ -10,8 +10,7 @@ import java.lang.management.ManagementFactory;
 public class ObjPoolTest {
     @Test
     public void testPool() throws InterruptedException {
-        GenericPool<WebDriver> webDriverGenericPool = new GenericPool<>(3, (V) -> new EdgeDriver(),
-                WebDriver::close);
+        GenericPool<WebDriver> webDriverGenericPool = new GenericPool<>(3, EdgeDriver::new, WebDriver::close);
         for (int i = 0; i < 10; i++) {
             Thread thread = new Thread(() -> {
                 WebDriver driver = webDriverGenericPool.borrowObject();
@@ -30,10 +29,13 @@ public class ObjPoolTest {
         Thread.sleep(4096 * 11);
     }
 
+    // Show host's physical memory size
     @Test
     public void SystemInfoTest(){
-        com.sun.management.OperatingSystemMXBean mxbean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-        long totalMemorySize = mxbean.getTotalMemorySize() >> 30;
+        long totalMemorySize = ((com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean())
+                .getTotalMemorySize() >> 30;
+
+        System.out.println(totalMemorySize);
         Assert.assertTrue(totalMemorySize > 0 && totalMemorySize < 100);
     }
 }
