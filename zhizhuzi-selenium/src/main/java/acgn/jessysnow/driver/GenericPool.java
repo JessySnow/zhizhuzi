@@ -1,72 +1,97 @@
 package acgn.jessysnow.driver;
 
-import acgn.jessysnow.helper.UnsafeHelper;
 import lombok.extern.log4j.Log4j2;
-import sun.misc.Unsafe;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.AbstractQueuedSynchronizer;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Log4j2
-public final class GenericPool<T> {
-    private final int size;
-    private int current = 0;
-    private long currentByteOffset;
-    private final Function<Void, T> constructor;
-    private final Consumer<T> closeObj;
-    private final Unsafe unsafe;
+public final class GenericPool<T> implements Lock {
+    private final Supplier<T> supplier;
+    private final SharedSynchronizer synchronizer;
 
     // driver pool
     private final ConcurrentLinkedQueue<T> pool = new ConcurrentLinkedQueue<>();
-    // mq
-    private final ConcurrentLinkedQueue<Thread> waitQueue = new ConcurrentLinkedQueue<>();
 
     public T borrowObject() {
-        T res;
-        while ((res = pool.poll()) == null) {
-            final int origin = current;
-            if (origin < size) {
-                if (unsafe.compareAndSwapInt(this, currentByteOffset, origin, origin + 1)) {
-                    res = constructor.apply(null);
-                    break;
-                }
-            } else {
-                waitQueue.offer(Thread.currentThread());
-                synchronized (Thread.currentThread()) {
-                    try {
-                        log.info("{} --> wait", Thread.currentThread().getName());
-                        Thread.currentThread().wait();
-                    } catch (InterruptedException ignored) {
-                    }
-                }
-            }
-        }
-        return res;
+        lock();
+        T obj = pool.poll();
+        return obj == null ? supplier.get() : obj;
     }
 
-    // FIXME use smaller range of supresswarning annonation
-    @SuppressWarnings("all")
     public void returnObject(T obj) {
-        this.pool.offer(obj);
-        Thread waitThread = waitQueue.poll();
-        if (waitThread != null) {
-            synchronized (waitThread) {
-                log.info("notify --> {}", waitThread.getName());
-                waitThread.notify();
-            }
-        }
+        pool.offer(obj);
+        unlock();
     }
 
-    @SuppressWarnings("deprecation")
-    GenericPool(int size, Function<Void, T> constructor, Consumer<T> closeObj) {
-        this.size = size;
-        this.constructor = constructor;
-        this.closeObj = closeObj;
-        this.unsafe = UnsafeHelper.getUnsafe();
-        try {
-            currentByteOffset = unsafe.objectFieldOffset(this.getClass().getDeclaredField("current"));
-        } catch (NoSuchFieldException ignored) {}
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> pool.forEach(closeObj)));
+    @Override
+    public void lock() {
+        synchronizer.acquireShared(1);
+    }
+
+    @Override
+    public void unlock(){
+        synchronizer.releaseShared(1);
+    }
+
+    @Override
+    public void lockInterruptibly() {
+        throw new UnsupportedOperationException("Unsupported so far");
+    }
+
+    @Override
+    public boolean tryLock() {
+        throw new UnsupportedOperationException("Unsupported so far");
+    }
+
+    @Override
+    public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+        throw new UnsupportedOperationException("Unsupported so far");
+    }
+
+    @Override
+    public Condition newCondition() {
+        throw new UnsupportedOperationException("Unsupported so far");
+    }
+
+    GenericPool(int size, Supplier<T> supplier, Consumer<T> clean) {
+        this.supplier = supplier;
+        this.synchronizer = new SharedSynchronizer(size);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> pool.forEach(clean)));
+    }
+
+    /**
+     * resources represents total resource count can borrow from pool
+     */
+    private static final class SharedSynchronizer extends AbstractQueuedSynchronizer{
+        public SharedSynchronizer(int resources){
+            super();
+            setState(resources);
+        }
+
+        @Override
+        protected int tryAcquireShared(int arg) {
+            for (;;){
+                final int state = getState();
+                final int newState = state - arg;
+                if (newState < 0 || compareAndSetState(state, newState)){
+                    return newState;
+                }
+            }
+        }
+
+        @Override
+        protected boolean tryReleaseShared(int arg) {
+            for (;;){
+                final int remain = getState();
+                if (compareAndSetState(remain, remain + arg))
+                    return true;
+            }
+        }
     }
 }

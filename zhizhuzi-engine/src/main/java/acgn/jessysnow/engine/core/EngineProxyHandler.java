@@ -5,7 +5,9 @@ import acgn.jessysnow.common.core.pojo.WebSite;
 import acgn.jessysnow.driver.DriverFactory;
 import acgn.jessysnow.enums.Browsers;
 import acgn.jessysnow.parser.DDomParser;
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -24,6 +26,7 @@ public class EngineProxyHandler<T extends WebSite> implements InvocationHandler 
         this.dDomParser = new DDomParser<>();
     }
 
+    // FIXME cookie append needed
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String methodName = method.getName();
@@ -40,18 +43,38 @@ public class EngineProxyHandler<T extends WebSite> implements InvocationHandler 
 
                 // FIXME driver wait
                 WebDriver driver = DriverFactory.buildDriver(type);
-                String uri = task.getUri().toString();
-                driver.get(uri);
-                driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
+                WebElement html;
+                try {
+                    String uri = task.getUri().toString();
+
+                    if (!StringUtils.isEmpty(task.getCookie())){
+                        // selenium cookie context prepare
+                        driver.get(uri);
+
+                        driver.manage().deleteAllCookies();
+                        String[] cookies = task.getCookie().split("; ");
+
+                        for (String cookie : cookies){
+                            String cookieName = cookie.substring(0, cookie.indexOf("="));
+                            String cookieValue = cookieName.substring(cookie.indexOf("=") + 1);
+                            driver.manage().addCookie(new Cookie(cookieName, cookieValue));
+                        }
+
+                    }
+
+                    driver.get(uri);
+                    driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
+
+                    html = driver.findElement(By.tagName("html"));
+                }finally {
+                    DriverFactory.releaseDriver(driver);
+                }
 
                 T t = clazz.getConstructor().newInstance();
-                WebElement html = driver.findElement(By.tagName("html"));
-                DriverFactory.releaseDriver(driver);
-
                 dDomParser.parse(html , t);
                 t.setTask(task);
-
                 engine.resultPipeline.execute(() -> engine.resConsumer.accept(t));
+
                 if (method.getName().equals("submit")){
                     return t;
                 }
