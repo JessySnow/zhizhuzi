@@ -76,11 +76,12 @@ public final class GenericPool<T> implements Lock {
 
         @Override
         protected int tryAcquireShared(int arg) {
-            final int remain = getState();
-            if(remain == 0){
-                return -1;
-            }else{
-                return compareAndSetState(remain, remain - 1) ? 1 : -1;
+            for (;;){
+                final int state = getState();
+                final int newState = state - arg;
+                if (newState < 0 || compareAndSetState(state, newState)){
+                    return newState;
+                }
             }
         }
 
@@ -88,7 +89,7 @@ public final class GenericPool<T> implements Lock {
         protected boolean tryReleaseShared(int arg) {
             for (;;){
                 final int remain = getState();
-                if (compareAndSetState(remain, remain + 1))
+                if (compareAndSetState(remain, remain + arg))
                     return true;
             }
         }
