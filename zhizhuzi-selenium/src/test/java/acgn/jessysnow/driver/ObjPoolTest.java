@@ -15,7 +15,7 @@ public class ObjPoolTest {
             Thread thread = new Thread(() -> {
                 WebDriver driver = webDriverGenericPool.borrowObject();
                 try {
-                    driver.get("https://south-plus.org");
+                    driver.get("https://www.baidu.com");
                     Thread.sleep(4096);
                     System.out.println("Here");
                 } catch (InterruptedException e) {
