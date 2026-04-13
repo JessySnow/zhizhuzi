@@ -1,10 +1,10 @@
-# Zhuzhuzi
+# Zhizhuzi
 > A simple and easy-to-use crawler framework based on netty
 
 ## Project structure
-- zhuzhuzi-common : Define common exceptions, pojo, enums and etc
-- zhuzhuzi-engine : Download engine and configuration of framework
-- zhuzhuzi-jsoup : HTML dom parser
+- zhizhuzi-common : Define common exceptions, pojo, enums and etc
+- zhizhuzi-engine : Download engine and configuration of framework
+- zhizhuzi-jsoup : HTML dom parser
 - zhizhuzi-gson : Json parser
 
 ## User guide
